@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Quality Earning Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+            
+    <script src='//libtl.com/sdk.js' data-zone='10117888' data-sdk='show_10117888'></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        /* --- CSS STYLES --- */
+        body { font-family: 'Poppins', sans-serif; text-align: center; padding: 0; background-color: #f7f9fc; color: #1f2937; margin: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 0 0 20px 0; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 15px; overflow: hidden; }
+        .header-card { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 30px 20px; text-align: left; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 6px 15px rgba(29, 78, 216, 0.3); }
+        .header-card p { margin: 0 0 5px 0; font-weight: 500; opacity: 0.9; font-size: 14px; }
+        .header-card .amount { font-size: 44px; font-weight: 700; }
+        .header-card .user-info { font-size: 14px; margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 10px; }
+        .tab-menu { display: flex; justify-content: space-around; margin: 20px 0 30px 0; background-color: white; border-bottom: 1px solid #e5e7eb; padding: 0 10px; flex-wrap: wrap; }
+        .tab-menu button { background: none; border: none; padding: 15px 8px; cursor: pointer; font-size: 13px; transition: all 0.3s; color: #6b7280; font-weight: 600; display: flex; align-items: center; gap: 5px; flex-grow: 1; justify-content: center;}
+        .tab-menu button.active { color: #1d4ed8; border-bottom: 3px solid #1d4ed8; }
+        .tab-menu button i { font-size: 16px; }
+        .tab-content { padding: 0 20px; text-align: left; }
+        h2 { font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 20px; border-left: 4px solid #1d4ed8; padding-left: 10px; }
+        .task-card { background-color: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; }
+        .task-info h4 { margin: 0 0 5px 0; font-size: 16px; color: #1f2937; font-weight: 600; }
+        .task-info p { margin: 0; font-size: 13px; color: #6b7280; }
+        .task-reward { font-size: 18px; font-weight: 700; color: #10b981; }
+        .task-btn { background-color: #f59e0b; color: white; padding: 8px 15px; border-radius: 5px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; }
+        .btn-action { 
+            background-color: #10b981; color: white; padding: 14px 25px; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600; transition: background-color 0.3s; width: 100%; box-sizing: border-box; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 16px;
+        }
+        .btn-action:hover { background-color: #059669; }
+        input[type="number"], input[type="text"], select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-size: 15px; background-color: #f9fafb; }
+        #ad-card { border: 2px solid #3b82f6; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        #ad-card h3 { color: #1d4ed8; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;}
+        #ad-progress-container { background-color: #e5e7eb; border-radius: 50px; height: 15px; margin: 15px 0; overflow: hidden;}
+        #ad-progress-bar { height: 100%; width: 0%; background-color: #10b981; border-radius: 50px; transition: width 0.5s ease-in-out;}
+        #collect-btn { background-color: #f97316 !important; animation: pulse-orange 1.5s infinite; margin-top: 15px !important;}
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
+        .completed { background-color: #d1fae5; color: #065f46; cursor: default !important; }
+        .completed:hover { background-color: #d1fae5 !important; }
+        .task-card a { text-decoration: none; }
+        .progress-text { text-align: center; font-weight: 600; font-size: 15px; color: #4b5563; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-card">
+            <p>মোট ইনকাম</p>
+            <div class="amount"><i class="fas fa-dollar-sign"></i> <span id="user-balance">0.00</span></div>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i> ইউজার: <strong id="tg-username">@LoadingUser</strong>
+            </div>
+        </div>
+
+        <div class="tab-menu">
+            <button class="active" onclick="showTab('earn', this)"><i class="fas fa-gift"></i> ডেইলি বোনাস</button>
+            <button onclick="showTab('tasks', this)"><i class="fas fa-tasks"></i> টাস্ক</button>
+            <button onclick="showTab('video-claim', this)"><i class="fab fa-youtube"></i> ভিডিও ক্লেইম</button>
+            <button onclick="showTab('withdraw', this)"><i class="fas fa-wallet"></i> উইথড্র</button>
+            <button onclick="showTab('refer', this)"><i class="fas fa-share-alt"></i> রেফার</button>
+            <button onclick="showTab('support', this)"><i class="fas fa-headset"></i> সাপোর্ট</button>
+        </div>
+
+        <div id="earn-tab" class="tab-content">
+            <h2><i class="fas fa-coins"></i> দৈনিক ইনকাম (অ্যাড ভিউ)</h2>
+            <div id="ad-card">
+                <h3><i class="fas fa-video"></i> আজকের অ্যাড ক্লেইম</h3>
+                <p style="color: #6b7280; font-size: 14px; text-align: center;">মোট অ্যাড ভিউ করে $ <strong style="color:#10b981;">0.50</strong> ইনকাম করুন।</p>
+                <div id="ad-progress-container">
+                    <div id="ad-progress-bar"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="ad-count">0</span> / <span id="ad-limit">5</span> অ্যাড দেখা হয়েছে
+                </div>
+                <button id="collect-btn" class="btn-action" disabled>
+                    <i class="fas fa-spinner fa-spin" id="ad-loader" style="display:inline-block;"></i> লোড হচ্ছে...
+                </button>
+            </div>
+        </div>
+        
+        <div id="tasks-tab" class="tab-content" style="display:none;">
+            <h2><i class="fas fa-link"></i> ইনস্ট্যান্ট সোশ্যাল টাস্ক</h2>
+            <div class="task-card">
+                <div class="task-info"> <h4>ইউটিউব সাবস্ক্রাইব করুন</h4> <p>আমাদের ইউটিউব চ্যানেলে সাবস্ক্রাইব করে ইনস্ট্যান্ট $1.00 ক্লেইম করুন।</p> </div>
+                <div class="task-reward"><i class="fas fa-dollar-sign"></i> 1.00</div>
+                <a href="https://www.youtube.com/@techblogbd" target="_blank" onclick="claimSocialReward('youtube', document.getElementById('youtube-btn')); return false;"> <button id="youtube-btn" class="task-btn">সাবস্ক্রাইব & ক্লেইম</button> </a>
+            </div>
+            <div class="task-card">
+                <div class="task-info"> <h4>টেলিগ্রাম চ্যানেলে যুক্ত হন</h4> <p>আমাদের অফিসিয়াল টেলিগ্রাম চ্যানেলে জয়েন করে ইনস্ট্যান্ট $0.50 ক্লেইম করুন।</p> </div>
+                <div class="task-reward"><i class="fas fa-dollar-sign"></i> 0.50</div>
+                <a href="https://t.me/techblogbdofficial" target="_blank" onclick="claimSocialReward('telegram', document.getElementById('telegram-btn')); return false;"> <button id="telegram-btn" class="task-btn">জয়েন & ক্লেইম</button> </a>
+            </div>
+            <h2 style="margin-top: 30px;"><i class="fas fa-fire"></i> উচ্চ আয়ের অফার</h2>
+            <div id="tasks-list">
+                <div class="task-card" style="border: 2px solid #3b82f6;">
+                    <div class="task-info"> <h4>স্মার্টলিংক ভিজিট</h4> <p>বিভিন্ন হাই-পেয়িং অফার ভিজিট করুন। (CPC ভিত্তিক ইনকাম)</p> </div>
+                    <div class="task-reward">উচ্চ CPM</div>
+                    <a href="https://otieu.com/4/10117894" target="_blank"> <button class="task-btn" style="background-color: #06b6d4;">ভিজিট করুন</button> </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="video-claim-tab" class="tab-content" style="display:none;">
+            <h2><i class="fab fa-youtube"></i> ভিডিও দেখুন ও ক্লেইম করুন ($<strong id="video-claim-reward">0.80</strong>)</h2>
+            <div id="video-task-card" class="task-card" style="display: block; text-align: center; border: 2px dashed #3b82f6; padding: 10px;">
+                <p style="font-weight: 600; margin-bottom: 5px;">ভিডিও টাইটেল:</p>
+                <h4 id="video-title" style="color: #1d4ed8; margin-bottom: 15px;">Load হচ্ছে...</h4>
+                <div id="youtube-player-container" style="width: 100%; aspect-ratio: 16 / 9; margin: 10px 0;"><div id="youtube-player"></div></div>
+                <p style="margin-top: 15px; color: #ef4444; font-weight: 700;" id="video-instruction">ভিডিওটি পুরোপুরি দেখা না হলে ক্লেইম বাটন চালু হবে না।</p>
+                <button id="video-claim-btn" class="btn-action" disabled style="background-color: #10b981;">
+                    <i class="fas fa-hourglass-start"></i> ভিডিওটি শেষ হওয়া পর্যন্ত অপেক্ষা করুন
+                </button>
+                <p id="claim-status" style="color: #6b7280; margin-top: 10px; font-weight: 500;">
+                    আজকের স্ট্যাটাস: <span id="video-today-status">লোড হচ্ছে...</span>
+                </p>
+            </div>
+        </div>
+
+        <div id="withdraw-tab" class="tab-content" style="display:none;">
+            <h2><i class="fas fa-money-check-alt"></i> টাকা তোলার অনুরোধ</h2>
+            <form id="withdrawal-form">
+                <p style="color: #ef4444; font-weight: 600;">সর্বনিম্ন উইথড্রয়াল: <strong id="min-withdraw-amount">লোড হচ্ছে...</strong></p>
+                <input type="number" id="amount" placeholder="পরিমাণ" required>
+                <select id="method" required><option value="bKash">বিকাশ</option><option value="Nagad">নগদ</option></select>
+                <input type="text" id="account" placeholder="আপনার পেমেন্ট নম্বর" required>
+                <button type="submit" class="btn-action" style="background-color: #3b82f6;">
+                    <i class="fas fa-paper-plane"></i> অনুরোধ পাঠান
+                </button>
+            </form>
+        </div>
+
+        <div id="refer-tab" class="tab-content" style="display:none;">
+            <h2><i class="fas fa-user-friends"></i> বন্ধু রেফার করুন</h2>
+            <p>আপনার রেফার লিংক কপি করে বন্ধুদের সাথে শেয়ার করুন:</p>
+            <input type="text" id="referral-link" value="https://t.me/easyearningsads_bot?start=refID" readonly>
+            <button class="btn-action" onclick="copyReferralLink()" style="background-color: #f97316;">
+                <i class="fas fa-copy"></i> লিংক কপি করুন
+            </button>
+            <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">**এক্সক্লুসিভ ইনকাম:** অতিরিক্ত বোনাসের জন্য আমাদের স্মার্ট অপশন ব্যবহার করুন।</p>
+            <button class="btn-action" onclick="window.open('https://otieu.com/4/10117894', '_blank')" style="background-color: #06b6d4;">
+                <i class="fas fa-link"></i> স্মার্ট অপশন ভিজিট করুন
+            </button>
+        </div>
+        
+        <div id="support-tab" class="tab-content" style="display:none;">
+            <h2><i class="fas fa-question-circle"></i> সাপোর্ট ও যোগাযোগ</h2>
+            <div class="task-card" style="display: block; text-align: center; border: 2px solid #3b82f6;">
+                <p style="font-size: 16px; font-weight: 600; color: #1d4ed8; margin-bottom: 15px;">সরাসরি আমাদের সাথে কথা বলুন</p>
+                <p style="color: #6b7280; margin-bottom: 20px;">পেমেন্ট সংক্রান্ত সমস্যা বা অন্য কোনো জিজ্ঞাসা থাকলে নিচের বাটনে ক্লিক করুন:</p>
+                <a href="https://t.me/Your_Support_Username" target="_blank"> 
+                    <button class="btn-action" style="background-color: #0088CC;"> <i class="fab fa-telegram-plane"></i> সাপোর্ট চ্যাটে যান </button>
+                </a>
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb;">
+                    <p style="font-size: 14px; font-weight: 500; color: #1f2937; margin-bottom: 5px;">অফিসিয়াল চ্যানেল:</p>
+                    <a href="https://t.me/techblogbdofficial" target="_blank" style="color: #0088CC; text-decoration: none; font-weight: 600;"> <i class="fab fa-telegram"></i> @TechBlogBdOfficial </a>
+                </div>
+                <div style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: #ef4444; margin: 0;">দয়া করে বার বার মেসেজ করে বিরক্তি সৃষ্টি করবেন না। আমরা ২৪ ঘন্টার মধ্যে আপনার প্রশ্নের উত্তর দেবো।</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // *** ১. FIREBASE কনফিগারেশন (আপনার দেওয়া তথ্য অনুযায়ী) ***
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbugSJucb7OfrGbWqjbMEBIl6qAsg2BJ8",
+            authDomain: "my-project-c3584.firebaseapp.com",
+            databaseURL: "https://my-project-c3584-default-rtdb.firebaseio.com",
+            projectId: "my-project-c3584",
+            storageBucket: "my-project-c3584.appspot.com",
+            messagingSenderId: "876896062289",
+            appId: "1:876896062289:web:35ec2388f05d1c903e6170",
+            measurementId: "G-Q64B59JRHR"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // **কোর ডেটা এবং ইউজার লোডিং**
+        const tgData = window.Telegram.WebApp.initDataUnsafe;
+        const user = tgData.user || {};
+        let currentUserId = user.id ? user.id.toString() : null;
+        
+        // ** ২. গ্লোবাল কনফিগারেশন **
+        const BONUS_AMOUNT = 0.50; 
+        const adButton = document.getElementById('collect-btn');
+        const showMonetagAd = window.show_10117888; 
+        const TODAY = new Date().toISOString().split('T')[0];
+        let globalAdLimit = 5; 
+        let globalMinWithdrawal = 500;
+        let globalVideoTask = {
+            link: "dQw4w9WgXcQ", // আপনার YouTube Video ID
+            title: "গুরুত্বপূর্ণ আপডেট ভিডিওটি দেখুন", 
+            reward: 0.80
+        };
+        const SOCIAL_TASKS = {
+            youtube: { reward: 1.00, key: 'youtubeSubscribed', buttonId: 'youtube-btn' },
+            telegram: { reward: 0.50, key: 'telegramJoined', buttonId: 'telegram-btn' }
+        };
+
+        // --- ৩. ইউটিউব প্লেয়ার লজিক ---
+        let player;
+        let videoWatched = false;
+        
+        function loadYouTubeAPI() { 
+             const tag = document.createElement('script');
+             tag.src = "https://www.youtube.com/iframe_api";
+             const firstScriptTag = document.getElementsByTagName('script')[0];
+             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+        
+        window.onYouTubeIframeAPIReady = function() {
+             if (document.getElementById('video-claim-tab').style.display !== 'none' && !player) {
+                 createYouTubePlayer(globalVideoTask.link);
+             }
+        };
+        
+        function createYouTubePlayer(videoId) { 
+             // পুরনো প্লেয়ার থাকলে তা ধ্বংস করে দিন 
+             if (player) { player.destroy(); player = null; }
+             
+             // যদি ভিডিও ক্লেইম করা হয়ে যায়, তবে প্লেয়ার তৈরি করার দরকার নেই
+             if (document.getElementById('video-today-status').innerText.includes('সম্পন্ন')) return;
+
+             player = new YT.Player('youtube-player', {
+                 videoId: videoId,
+                 playerVars: {
+                     'controls': 1,
+                     'autoplay': 0,
+                     'modestbranding': 1,
+                     'rel': 0,
+                     'showinfo': 0
+                 },
+                 events: {
+                     'onReady': onPlayerReady,
+                     'onStateChange': onPlayerStateChange
+                 }
+             });
+        }
+        
+        function onPlayerReady(event) {}
+        
+        function onPlayerStateChange(event) {
+            const videoClaimBtn = document.getElementById('video-claim-btn');
+            const videoInstruction = document.getElementById('video-instruction');
+
+            if (event.data === YT.PlayerState.PLAYING) {
+                document.querySelectorAll('.tab-menu button').forEach(btn => btn.disabled = true);
+                document.querySelector('.tab-menu button.active').disabled = false;
+                videoClaimBtn.disabled = true;
+                videoClaimBtn.innerHTML = `<i class="fas fa-lock"></i> ভিডিওটি শেষ না হওয়া পর্যন্ত অপেক্ষা করুন`;
+                videoInstruction.style.color = '#f97316';
+                videoInstruction.innerText = 'ভিডিও চলছে! পুরোপুরি শেষ হওয়ার জন্য অপেক্ষা করুন...';
+
+            } else if (event.data === YT.PlayerState.ENDED) {
+                videoWatched = true;
+                document.querySelectorAll('.tab-menu button').forEach(btn => btn.disabled = false); 
+                videoClaimBtn.disabled = false;
+                videoClaimBtn.innerHTML = `<i class="fas fa-check-circle"></i> $${globalVideoTask.reward.toFixed(2)} ক্লেইম করুন`;
+                videoClaimBtn.style.backgroundColor = '#10b981';
+                videoInstruction.style.color = '#10b981';
+                videoInstruction.innerText = 'অভিনন্দন! ভিডিও দেখা শেষ। এবার ক্লেইম বাটনটি ক্লিক করুন।';
+
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+                if (!videoWatched) {
+                    document.querySelectorAll('.tab-menu button').forEach(btn => btn.disabled = true);
+                    document.querySelector('.tab-menu button.active').disabled = false;
+                    videoInstruction.innerText = 'পজ করা হয়েছে। চালিয়ে যান...';
+                }
+            }
+        }
+        
+        // --- ৪. মূল ইউজার ডেটা লোড ফাংশন ---
+        async function loadUserData(userId) {
+            if (!userId) return;
+            
+            // ৪.১ গ্লোবাল সেটিংস লোড করা
+            try {
+                const configDoc = await db.collection("config").doc("global").get();
+                if (configDoc.exists) {
+                    const configData = configDoc.data();
+
+                    // --- 🔥 মেইন ওয়েবসাইট লিংক চেক (গুরুত্বপূর্ণ) 🔥 ---
+                    const mainWebsiteLink = configData.mainWebsiteLink;
+                    // বর্তমান URL-এর সঙ্গে Firebase-এ থাকা লিঙ্কের তুলনা করা হচ্ছে
+                    if (mainWebsiteLink && mainWebsiteLink !== window.location.href.split('?')[0]) {
+                        console.log("Redirecting to mainWebsiteLink:", mainWebsiteLink);
+                        // ইউজার ডেটা পাস করার জন্য start_param যুক্ত করা
+                        window.location.href = mainWebsiteLink + '?tgWebAppStartParam=' + (tgData.start_param || '');
+                        return; // রিডাইরেক্টের পর আর কোড এক্সিকিউট করার দরকার নেই
+                    }
+                    // --- রিডাইরেক্ট লজিক শেষ ---
+                    
+                    globalAdLimit = configData.dailyAdLimit || 5;
+                    globalMinWithdrawal = configData.minWithdrawal || 500;
+                    globalVideoTask.link = configData.videoLink || globalVideoTask.link;
+                    globalVideoTask.title = configData.videoTitle || globalVideoTask.title;
+                    globalVideoTask.reward = configData.videoReward || globalVideoTask.reward;
+                }
+            } catch (e) { console.error("Error loading global config:", e); }
+            
+            // UI আপডেট
+            document.getElementById('ad-limit').innerText = globalAdLimit;
+            document.getElementById('min-withdraw-amount').innerText = `${globalMinWithdrawal} টাকা`;
+            document.getElementById('video-title').innerText = globalVideoTask.title;
+            document.getElementById('video-claim-reward').innerText = globalVideoTask.reward.toFixed(2);
+
+            // ৪.২ ইউজার ডেটা লোড করা
+            const userRef = db.collection("users").doc(userId);
+            const doc = await userRef.get();
+            let userData = { balance: 0.00, adCount: 0, lastAdDate: null, youtubeSubscribed: false, telegramJoined: false, videoClaimDate: null };
+
+            if (doc.exists) { userData = doc.data(); } 
+            
+            // ডেইলি অ্যাড কাউন্ট রিসেট (যদি দিন বদলে যায়)
+            if (userData.lastAdDate !== TODAY) {
+                // শুধুমাত্র adCount রিসেট করলে হবে না, সাথে lastAdDate আপডেট করতে হবে
+                await userRef.update({ adCount: 0, lastAdDate: TODAY });
+                userData.adCount = 0;
+            }
+
+            // ৪.৩ UI আপডেট (ব্যালেন্স, অ্যাড কাউন্ট)
+            document.getElementById('user-balance').innerText = `${userData.balance ? userData.balance.toFixed(2) : '0.00'}`;
+            document.getElementById('tg-username').innerText = user.username ? `@${user.username}` : user.first_name || "ইউজার";
+            const adCount = userData.adCount || 0;
+            document.getElementById('ad-count').innerText = adCount;
+            document.getElementById('ad-progress-bar').style.width = `${(adCount / globalAdLimit) * 100}%`;
+
+            if (adCount >= globalAdLimit) {
+                adButton.disabled = true;
+                adButton.innerHTML = `<i class="fas fa-check"></i> আজকের টাস্ক সম্পন্ন`;
+                adButton.style.backgroundColor = '#10b981';
+            } else {
+                preloadMonetagAd();
+            }
+            
+            // সোশ্যাল টাস্ক বাটন স্ট্যাটাস আপডেট
+            for (const taskName in SOCIAL_TASKS) {
+                const task = SOCIAL_TASKS[taskName];
+                const button = document.getElementById(task.buttonId);
+                if (userData[task.key]) {
+                    button.disabled = true;
+                    button.innerText = 'ইতিমধ্যেই ক্লেইম করা হয়েছে';
+                    button.classList.add('completed');
+                } else {
+                    button.disabled = false;
+                    button.innerText = (taskName === 'youtube') ? 'সাবস্ক্রাইব & ক্লেইম' : 'জয়েন & ক্লেইম';
+                    button.classList.remove('completed');
+                }
+            }
+
+            // ৪.৪ ভিডিও ক্লেইম স্ট্যাটাস আপডেট
+            const videoClaimBtn = document.getElementById('video-claim-btn');
+            const videoTodayStatus = document.getElementById('video-today-status');
+            const videoInstruction = document.getElementById('video-instruction');
+            
+            if (userData.videoClaimDate === TODAY) {
+                videoTodayStatus.innerText = 'আজকের ভিডিও টাস্কটি ইতিমধ্যেই সম্পন্ন হয়েছে।';
+                videoTodayStatus.style.color = '#10b981';
+                videoClaimBtn.disabled = true;
+                videoClaimBtn.innerHTML = `<i class="fas fa-check"></i> আজকের জন্য ক্লেইম করা শেষ`;
+                videoInstruction.style.display = 'none'; 
+                if (player) { player.destroy(); player = null; }
+                document.getElementById('youtube-player').innerHTML = '';
+
+            } else {
+                videoTodayStatus.innerText = 'ভিডিও দেখে ক্লেইম করুন।';
+                videoTodayStatus.style.color = '#f97316';
+                videoClaimBtn.disabled = true; 
+                videoClaimBtn.innerHTML = `<i class="fas fa-hourglass-start"></i> ভিডিওটি শেষ হওয়া পর্যন্ত অপেক্ষা করুন`;
+                videoInstruction.style.display = 'block'; 
+                videoWatched = false;
+                
+                // শুধুমাত্র video-claim ট্যাব একটিভ থাকলেই YouTube প্লেয়ার লোড করা
+                if (document.getElementById('video-claim-tab').style.display !== 'none' && window.YT && !player) {
+                    createYouTubePlayer(globalVideoTask.link);
+                }
+            }
+        }
+        
+        // --- ৫. Monetag অ্যাড লজিক (Preload/Show) ---
+        function preloadMonetagAd() {
+            adButton.disabled = false;
+            adButton.innerHTML = `<i class="fas fa-eye"></i> একটি অ্যাড দেখুন ও $${BONUS_AMOUNT.toFixed(2)} ইনকাম করুন`;
+            adButton.style.backgroundColor = '#f97316';
+            if (showMonetagAd) {
+                 showMonetagAd(); // অ্যাড লোড করা
+            }
+        }
+        
+        adButton.addEventListener('click', async function() {
+            if (adButton.disabled) return;
+        
+            adButton.disabled = true;
+            adButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...`;
+            adButton.style.backgroundColor = '#3b82f6';
+        
+            if (showMonetagAd) {
+                 // অ্যাড দেখানোর জন্য সামান্য দেরি
+                 await new Promise(resolve => setTimeout(resolve, 500)); 
+                 showMonetagAd();
+            } else {
+                // অ্যাড লাইব্রেরি লোড না হলে ম্যানুয়াল দেরি
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        
+            try {
+                // Firestore-এ আপডেট
+                const userRef = db.collection("users").doc(currentUserId);
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(userRef);
+                    let userData = doc.data() || { balance: 0, adCount: 0, lastAdDate: TODAY };
+        
+                    if (userData.adCount >= globalAdLimit) {
+                        throw new Error("Daily limit reached.");
+                    }
+        
+                    const newBalance = (userData.balance || 0) + BONUS_AMOUNT;
+                    const newAdCount = (userData.adCount || 0) + 1;
+        
+                    transaction.update(userRef, {
+                        balance: newBalance,
+                        adCount: newAdCount,
+                        lastAdDate: TODAY
+                    });
+        
+                    document.getElementById('user-balance').innerText = newBalance.toFixed(2);
+                    document.getElementById('ad-count').innerText = newAdCount;
+                    document.getElementById('ad-progress-bar').style.width = `${(newAdCount / globalAdLimit) * 100}%`;
+                });
+        
+                alert(`অভিনন্দন! আপনি $${BONUS_AMOUNT.toFixed(2)} ইনকাম করেছেন।`);
+                loadUserData(currentUserId);
+        
+            } catch (error) {
+                console.error("Ad claim failed:", error);
+                alert("ক্লেইম করা যায়নি: " + (error.message.includes("Daily limit reached") ? "আজকের অ্যাড লিমিট শেষ।" : "ত্রুটি হয়েছে, আবার চেষ্টা করুন।"));
+                loadUserData(currentUserId);
+            }
+        });
+
+        // --- ৬. সোশ্যাল টাস্ক ক্লেইম লজিক ---
+        async function claimSocialReward(taskName, buttonElement) {
+             if (buttonElement.disabled) return;
+             
+             buttonElement.disabled = true;
+             buttonElement.innerText = 'প্রসেস হচ্ছে...';
+             buttonElement.style.backgroundColor = '#3b82f6';
+        
+             const task = SOCIAL_TASKS[taskName];
+             const userRef = db.collection("users").doc(currentUserId);
+        
+             try {
+                 await db.runTransaction(async (transaction) => {
+                     const doc = await transaction.get(userRef);
+                     let userData = doc.data() || { balance: 0 };
+        
+                     if (userData[task.key]) {
+                         throw new Error("Already claimed.");
+                     }
+        
+                     const newBalance = (userData.balance || 0) + task.reward;
+        
+                     // ইউজার ডেটা আপডেট
+                     const updateData = {
+                         balance: newBalance,
+                         [task.key]: true // youtubeSubscribed বা telegramJoined কে true করা
+                     };
+                     transaction.update(userRef, updateData);
+        
+                     document.getElementById('user-balance').innerText = newBalance.toFixed(2);
+                 });
+        
+                 alert(`অভিনন্দন! আপনি $${task.reward.toFixed(2)} বোনাস পেয়েছেন।`);
+                 loadUserData(currentUserId);
+             } catch (error) {
+                 console.error(`Claiming ${taskName} failed:`, error);
+                 alert("ক্লেইম করা যায়নি: " + (error.message.includes("Already claimed") ? "ইতিমধ্যেই ক্লেইম করা হয়েছে।" : "ত্রুটি হয়েছে। লিংক ভিজিট করে আবার চেষ্টা করুন।"));
+                 loadUserData(currentUserId);
+             }
+        }
+        window.claimSocialReward = claimSocialReward;
+
+        // --- ৭. ভিডিও ক্লেইম সাবমিশন লজিক ---
+        document.getElementById('video-claim-btn').addEventListener('click', async function() {
+            if (!videoWatched || this.disabled) return;
+        
+            this.disabled = true;
+            this.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ক্লেইম করা হচ্ছে...`;
+            this.style.backgroundColor = '#3b82f6';
+        
+            try {
+                const userRef = db.collection("users").doc(currentUserId);
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(userRef);
+                    let userData = doc.data() || { balance: 0 };
+        
+                    if (userData.videoClaimDate === TODAY) {
+                        throw new Error("Already claimed for today.");
+                    }
+        
+                    const newBalance = (userData.balance || 0) + globalVideoTask.reward;
+        
+                    transaction.update(userRef, {
+                        balance: newBalance,
+                        videoClaimDate: TODAY
+                    });
+        
+                    document.getElementById('user-balance').innerText = newBalance.toFixed(2);
+                });
+        
+                alert(`অভিনন্দন! আপনি ভিডিও দেখে $${globalVideoTask.reward.toFixed(2)} ক্লেইম করেছেন।`);
+                loadUserData(currentUserId);
+        
+            } catch (error) {
+                console.error("Video claim failed:", error);
+                alert("ভিডিও ক্লেইম করা যায়নি: " + (error.message.includes("Already claimed for today") ? "আজকের ক্লেইম সম্পন্ন হয়েছে।" : "ত্রুটি হয়েছে, আবার চেষ্টা করুন।"));
+                loadUserData(currentUserId);
+            }
+        });
+
+
+        // ** ৮. উইথড্রয়াল লজিক **
+        document.getElementById('withdrawal-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const method = document.getElementById('method').value;
+            const account = document.getElementById('account').value;
+            
+            const submitBtn = document.querySelector('#withdrawal-form button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> অনুরোধ পাঠানো হচ্ছে...`;
+        
+            try {
+                if (isNaN(amount) || amount <= 0) { throw new Error("পরিমাণ সঠিক নয়।"); }
+                if (amount < globalMinWithdrawal) { throw new Error(`সর্বনিম্ন উইথড্রয়াল $${globalMinWithdrawal} এর কম।`); }
+
+                const userRef = db.collection("users").doc(currentUserId);
+                
+                let success = false;
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(userRef);
+                    let userData = doc.data() || { balance: 0 };
+        
+                    
+                    if (userData.balance < amount) {
+                        throw new Error("অপর্যাপ্ত ব্যালেন্স।");
+                    }
+        
+                    // উইথড্রয়াল রিকোয়েস্ট তৈরি
+                    const withdrawalRequest = {
+                        userId: currentUserId,
+                        username: user.username || user.first_name,
+                        amount: amount,
+                        method: method,
+                        account: account,
+                        status: 'Pending',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+        
+                    // উইথড্রয়াল কালেকশনে যোগ করা
+                    transaction.set(db.collection("withdrawals").doc(), withdrawalRequest);
+        
+                    // ইউজার ব্যালেন্স আপডেট
+                    transaction.update(userRef, {
+                        balance: userData.balance - amount // ব্যালেন্স থেকে টাকা কেটে নেওয়া
+                    });
+                    
+                    document.getElementById('user-balance').innerText = (userData.balance - amount).toFixed(2);
+                    success = true;
+                });
+                
+                if (success) {
+                    alert("উইথড্রয়াল অনুরোধ সফলভাবে পাঠানো হয়েছে। ২৪-৪৮ ঘন্টার মধ্যে পেমেন্ট পেয়ে যাবেন।");
+                    document.getElementById('withdrawal-form').reset();
+                    loadUserData(currentUserId); // নতুন ব্যালেন্স লোড করা
+                }
+        
+            } catch (error) {
+                console.error("Withdrawal failed:", error);
+                alert("উইথড্রয়াল ব্যর্থ: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> অনুরোধ পাঠান`;
+            }
+        });
+
+
+        // ** ৯. ইউটিলিটি ফাংশন **
+        function showTab(tabName, button) { 
+            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+            document.querySelectorAll('.tab-menu button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            button.classList.add('active');
+
+            // ভিডিও ট্যাব লজিক
+            if (tabName === 'video-claim') {
+                // শুধু মাত্র তখনই লোড হবে যখন YT API লোড হয়েছে বা লোড করার প্রয়োজন
+                if (window.YT) { 
+                    loadUserData(currentUserId); 
+                } else { 
+                    loadYouTubeAPI(); 
+                }
+            } else if (player) {
+                // অন্য ট্যাবে গেলে প্লেয়ার নষ্ট করে দেওয়া হয় রিসোর্স বাঁচাতে
+                player.destroy(); 
+                player = null;
+                document.getElementById('youtube-player').innerHTML = '';
+            }
+        }
+        window.showTab = showTab;
+
+        function copyReferralLink() {
+            const copyText = document.getElementById("referral-link");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                alert("রেফার লিংক কপি করা হয়েছে!");
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("কপি করা যায়নি, ম্যানুয়ালি কপি করুন।");
+            });
+        }
+        window.copyReferralLink = copyReferralLink;
+
+        // ** ১০. ইনিশিয়ালাইজেশন **
+        if (currentUserId) {
+            loadUserData(currentUserId);
+            // রেফারেল লিঙ্ক আপডেট করা
+            const referralLinkInput = document.getElementById('referral-link');
+            if(referralLinkInput) {
+                // start_param এর মধ্যে রেফার আইডি যুক্ত করা
+                referralLinkInput.value = `https://t.me/easyearningsads_bot?start=ref${currentUserId}`;
+            }
+        } else {
+             alert("ইউজার আইডি লোড হচ্ছে না। দয়া করে টেলিগ্রাম অ্যাপ থেকে আবার চেষ্টা করুন।");
+             // টেস্টিং এর জন্য, আপনি এখানে একটি ডামি লোড করতে পারেন:
+             // loadUserData("TEST_USER_12345");
+        }
+    </script>
+</body>
+</html>
