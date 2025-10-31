@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn Ads - Telegram Mini App (Final Version)</title>
+    <title>Earn Ads - Telegram Mini App</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
@@ -18,7 +18,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script> 
 
     <style>
-        /* Telegram Theme Variables */
         :root {
             --tg-bg: var(--tg-theme-bg-color, #ffffff);
             --tg-text: var(--tg-theme-text-color, #000000);
@@ -36,10 +35,23 @@
         .card { background-color: var(--tg-secondary-bg); border: none; }
         .card-balance { border-left: 5px solid var(--tg-link); box-shadow: 0 4px 6px rgba(0,0,0,.05); }
         .earning-value { font-size: 2.5rem; font-weight: 700; color: var(--tg-text); }
-        .ad-box { background-color: var(--tg-bg); border: 2px dashed var(--tg-link); min-height: 250px; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .ad-box { background-color: var(--tg-bg); border: 2px dashed var(--tg-link); min-height: 200px; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .btn-success { background-color: var(--tg-button); border-color: var(--tg-button); }
         .btn-success:hover { background-color: #1e7e34; border-color: #1c7430; }
         .text-danger { color: #dc3545 !important; }
+        .badge-pending { background-color: #ffc107; color: #000; }
+        .badge-completed { background-color: #28a745; color: #fff; }
+        .badge-new-bonus { background-color: #007bff; color: #fff; } 
+        .bonus-card-title { font-size: 1.2rem; font-weight: bold; color: var(--tg-link); }
+        
+        /* Modal Style for Telegram Theme */
+        .modal-content { background-color: var(--tg-bg); color: var(--tg-text); }
+        .modal-header, .modal-footer { border-color: var(--tg-secondary-bg); }
+        .form-control { background-color: var(--tg-secondary-bg); color: var(--tg-text); border-color: var(--tg-link); }
+        .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+            background-color: var(--tg-button);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
     </style>
 </head>
 <body>
@@ -49,64 +61,277 @@
         <i class="fas fa-wallet" style="color: var(--tg-link);"></i> Welcome, <span id="user_display_name">...</span>!
     </h1>
 
-    <div class="row mb-5">
-        <div class="col-12 mb-3">
-            <div class="card card-balance p-3">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-piggy-bank fa-3x mr-3" style="color: var(--tg-link);"></i>
-                    <div>
-                        <div class="font-weight-bold text-uppercase mb-1" style="color: var(--tg-link); font-size: 0.8rem;">Current Balance (USD)</div>
-                        <div class="earning-value" id="current_balance_value">$ 0.00</div>
+    <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="pills-dashboard-tab" data-toggle="pill" href="#pills-dashboard" role="tab"><i class="fas fa-chart-line"></i> Dashboard</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab"><i class="fas fa-user-circle"></i> Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-bonus-tab" data-toggle="pill" href="#pills-bonus" role="tab"><i class="fas fa-gift"></i> Bonus</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-referral-tab" data-toggle="pill" href="#pills-referral" role="tab"><i class="fas fa-share-alt"></i> Refer</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-support-tab" data-toggle="pill" href="#pills-support" role="tab"><i class="fas fa-headset"></i> Support</a>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+        
+        <div class="tab-pane fade show active" id="pills-dashboard" role="tabpanel">
+            <div class="row mb-5">
+                <div class="col-12 mb-3">
+                    <div class="card card-balance p-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-piggy-bank fa-3x mr-3" style="color: var(--tg-link);"></i>
+                            <div>
+                                <div class="font-weight-bold text-uppercase mb-1" style="color: var(--tg-link); font-size: 0.8rem;">Current Balance (USD)</div>
+                                <div class="earning-value" id="current_balance_value">$ 0.00</div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <div class="col-6 pr-1"><div class="card p-3 text-center"><i class="fas fa-chart-line mb-1" style="color: var(--tg-link);"></i><div class="small" style="color: var(--tg-text);">Total Earnings</div><h5 style="color: var(--tg-text);" id="total_earnings_value">$ 0.00</h5></div></div>
+                <div class="col-6 pl-1"><div class="card p-3 text-center"><i class="fas fa-eye mb-1" style="color: var(--tg-link);"></i><div class="small" style="color: var(--tg-text);">Today's Ad Views</div><h5 style="color: var(--tg-text);" id="ads_viewed_today_value">0 Ads</h5></div></div>
+            </div>
+
+            <hr style="background-color: var(--tg-link);">
+
+            <h4 class="mb-3" style="color: var(--tg-text);">📺 View Daily Rewarded Ad</h4>
+            <div class="ad-box mb-5">
+                <p class="lead" style="color: var(--tg-text); font-size: 1rem;">Click the button below to view the Rewarded Ad.</p>
+                
+                <button id="view_ad_btn" class="btn btn-success btn-lg" onclick="showRewardedAd()">
+                    <i class="fas fa-play-circle"></i> View Rewarded Ad (Earn $0.01)
+                </button>
+                <div id="ad_message" class="mt-3 font-weight-bold" style="display:none; color: var(--tg-link);"></div>
+            </div>
+
+            <hr style="background-color: var(--tg-link);">
+
+            <h4 class="mt-5 mb-3 border-bottom pb-2" style="color: var(--tg-text);">💸 Payout</h4>
+            <div class="card p-4 mb-5">
+                 <p class="font-weight-bold" style="color: #dc3545;">Minimum Withdrawal Limit: <span id="min_withdraw_limit">Loading...</span></p>
+                <button class="btn btn-lg btn-danger disabled" id="withdraw_button" disabled data-toggle="modal" data-target="#withdrawalModal">Request Withdrawal (Loading Rules...)</button>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel">
+            <h4 class="mb-3" style="color: var(--tg-text);">👤 User Profile Details</h4>
+            <div class="card p-4 mb-4">
+                <p><strong>Telegram User:</strong> <span id="p_username">N/A</span></p>
+                <p><strong>Telegram ID:</strong> <span id="p_tg_id">N/A</span></p>
+                <p><strong>Joined On:</strong> <span id="p_joined_on">Loading...</span></p>
+                <p><strong>Total Earnings:</strong> <span id="p_total_earnings">$0.00</span></p>
+            </div>
+
+            <h4 class="mb-3" style="color: var(--tg-text);">📜 Withdrawal History</h4>
+            <div class="card p-3">
+                <ul class="list-group list-group-flush" id="withdrawal_history_list">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: var(--tg-secondary-bg);">
+                        No withdrawal requests yet.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="tab-pane fade" id="pills-bonus" role="tabpanel">
+             <h4 class="mb-3" style="color: var(--tg-text);">🎁 Complete Taks & Earn Bonus</h4>
+            <p class="small text-danger">Note: Bonuses are manually verified by the Admin and may take up to 24 hours to credit.</p>
+            
+            <div class="card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="bonus-card-title"><i class="fab fa-youtube text-danger"></i> YouTube Video View</p>
+                        <p class="mb-1 small">Watch the full video and claim your bonus.</p>
+                        <p class="mb-2 font-weight-bold" style="color: var(--tg-text);">Bonus: <span class="badge badge-new-bonus">$0.50</span></p>
+                        <a href="#" target="_blank" class="btn btn-sm btn-outline-info" id="youtube_link" style="color: var(--tg-link); border-color: var(--tg-link);">Watch Video</a>
+                    </div>
+                    <button class="btn btn-warning ml-2" data-toggle="modal" data-target="#bonusClaimModal" data-task-type="YouTube Video View" data-bonus-amount="0.50" data-task-id="youtube">Claim Bonus</button>
+                </div>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="bonus-card-title"><i class="fab fa-tiktok" style="color: #000;"></i> TikTok Follow</p>
+                        <p class="mb-1 small">Follow our official TikTok profile.</p>
+                        <p class="mb-2 font-weight-bold" style="color: var(--tg-text);">Bonus: <span class="badge badge-new-bonus">$1.00</span></p>
+                        <a href="#" target="_blank" class="btn btn-sm btn-outline-info" id="tiktok_link" style="color: var(--tg-link); border-color: var(--tg-link);">Go to Profile</a>
+                    </div>
+                    <button class="btn btn-warning ml-2" data-toggle="modal" data-target="#bonusClaimModal" data-task-type="TikTok Follow" data-bonus-amount="1.00" data-task-id="tiktok">Claim Bonus</button>
+                </div>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="bonus-card-title"><i class="fab fa-telegram-plane"></i> Telegram Channel Join</p>
+                        <p class="mb-1 small">Join our official Telegram Channel.</p>
+                        <p class="mb-2 font-weight-bold" style="color: var(--tg-text);">Bonus: <span class="badge badge-new-bonus">$0.25</span></p>
+                        <a href="#" target="_blank" class="btn btn-sm btn-outline-info" id="telegram_link" style="color: var(--tg-link); border-color: var(--tg-link);">Join Channel</a>
+                    </div>
+                    <button class="btn btn-warning ml-2" data-toggle="modal" data-target="#bonusClaimModal" data-task-type="Telegram Channel Join" data-bonus-amount="0.25" data-task-id="telegram">Claim Bonus</button>
                 </div>
             </div>
         </div>
-        <div class="col-6 pr-1">
-            <div class="card p-3 text-center">
-                <i class="fas fa-chart-line mb-1" style="color: var(--tg-link);"></i>
-                <div class="small" style="color: var(--tg-text);">Total Earnings</div>
-                <h5 style="color: var(--tg-text);" id="total_earnings_value">$ 0.00</h5>
+
+        <div class="tab-pane fade" id="pills-referral" role="tabpanel">
+            <h4 class="mb-3" style="color: var(--tg-text);">👥 Refer Friends & Earn</h4>
+            
+            <div class="card p-4 mb-4 text-center">
+                <i class="fas fa-user-plus fa-3x mb-3" style="color: var(--tg-link);"></i>
+                <p class="lead font-weight-bold" style="color: var(--tg-text);">Your Referral Earnings:</p>
+                <h3 class="earning-value mb-3" id="referral_earnings_value">$ 0.00</h3>
+                <p class="small text-muted" id="referral_bonus_text">Loading referral bonus rate...</p> 
+            </div>
+            
+            <h5 class="mb-3" style="color: var(--tg-text);">🔗 Your Unique Referral Link:</h5>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="referral_link_input" value="Loading..." readonly style="background-color: var(--tg-bg); color: var(--tg-text);">
+                <div class="input-group-append">
+                    <button class="btn btn-success" type="button" onclick="copyReferralLink()"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+            </div>
+            
+            <div class="row text-center mt-4">
+                <div class="col-6">
+                    <div class="card p-3">
+                        <h5 class="font-weight-bold" id="total_referrals_count">0</h5>
+                        <p class="small mb-0">Total Referrals</p>
+                    </div>
+                </div>
+                 <div class="col-6">
+                    <div class="card p-3">
+                        <h5 class="font-weight-bold" id="successful_referrals_count">0</h5>
+                        <p class="small mb-0">Successful Sign-ups</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="background-color: var(--tg-link);" class="mt-4">
+            
+            <h5 class="mt-4 mb-3" style="color: var(--tg-text);">📜 Referral Earning History</h5>
+            <div class="card p-3">
+                <ul class="list-group list-group-flush" id="referral_history_list">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: var(--tg-secondary-bg);">
+                        No referral earnings yet.
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="col-6 pl-1">
-            <div class="card p-3 text-center">
-                <i class="fas fa-eye mb-1" style="color: var(--tg-link);"></i>
-                <div class="small" style="color: var(--tg-text);">Today's Ad Views</div>
-                <h5 style="color: var(--tg-text);" id="ads_viewed_today_value">0 Ads</h5>
-            </div>
-        </div>
-    </div>
-
-    <hr style="background-color: var(--tg-link);">
-
-    <h4 class="mb-3" style="color: var(--tg-text);">📺 View Rewarded Ad</h4>
-    <div class="ad-box mb-5">
-        <p class="lead" style="color: var(--tg-text); font-size: 1rem;">Click the button below to view the Rewarded Ad.</p>
         
-        <button id="view_ad_btn" class="btn btn-success btn-lg" onclick="showRewardedAd()">
-            <i class="fas fa-play-circle"></i> View Rewarded Ad (Earn $0.01)
-        </button>
-        <div id="ad_message" class="mt-3 font-weight-bold" style="display:none; color: var(--tg-link);"></div>
-    </div>
-
-    <hr style="background-color: var(--tg-link);">
-
-    <h4 class="mt-5 mb-3 border-bottom pb-2" style="color: var(--tg-text);">💸 Payout</h4>
-    <div class="card p-4 mb-5">
-         <p class="font-weight-bold" style="color: #dc3545;">Minimum Withdrawal Limit: $ <span id="min_withdraw_limit">50.00</span></p>
-        <button class="btn btn-lg btn-danger disabled" id="withdraw_button" disabled onclick="requestWithdrawal()">Request Withdrawal</button>
+        <div class="tab-pane fade" id="pills-support" role="tabpanel">
+            <h4 class="mb-3" style="color: var(--tg-text);">💬 Support / Contact Admin</h4>
+             <div class="card p-4 mb-4">
+                <p>Have any questions or issues? Send a direct message to the admin.</p>
+                
+                <form id="support_form">
+                    <div class="form-group">
+                        <label for="support_subject" style="color: var(--tg-text);">Subject:</label>
+                        <input type="text" class="form-control" id="support_subject" placeholder="e.g., Withdrawal Issue, Ad not loading" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="support_message" style="color: var(--tg-text);">Message:</label>
+                        <textarea class="form-control" id="support_message" rows="4" placeholder="Describe your issue in detail..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="send_support_btn">Send Message</button>
+                    <div id="support_message_status" class="mt-3 font-weight-bold" style="display:none; color: var(--tg-link);"></div>
+                </form>
+            </div>
+        </div>
+        
     </div>
 </main>
+
+<div class="modal fade" id="withdrawalModal" tabindex="-1" role="dialog" aria-labelledby="withdrawalModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="withdrawalModalLabel" style="color: var(--tg-text);"><i class="fas fa-money-check-alt"></i> Request Payout</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" style="color: var(--tg-text);">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p class="font-weight-bold" style="color: var(--tg-link);">Available Balance: <span id="modal_current_balance">$0.00</span></p>
+          <p class="text-danger small">Minimum Withdrawal: <span id="modal_min_limit">Loading...</span>. Please enter your account details carefully.</p>
+          
+          <form id="payout_form">
+              <div class="form-group">
+                  <label for="payout_method" style="color: var(--tg-text);">Select Payout Method:</label>
+                  <select class="form-control" id="payout_method" required>
+                      <option value="">-- Choose Option --</option>
+                      <option value="Binance Pay ID">Binance Pay ID (Recommended)</option>
+                      <option value="USDT TRC20">USDT (TRC20 Network)</option>
+                      <option value="USDT ERC20">USDT (ERC20 Network - High Fees)</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                  <label for="payout_address" style="color: var(--tg-text);">Account ID / Wallet Address:</label>
+                  <input type="text" class="form-control" id="payout_address" placeholder="Enter ID or Address" required>
+              </div>
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" id="confirm_payout_btn" onclick="submitWithdrawal()">Confirm Payout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="bonusClaimModal" tabindex="-1" role="dialog" aria-labelledby="bonusClaimModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bonusClaimModalLabel" style="color: var(--tg-text);"><i class="fas fa-gift"></i> Claim Bonus: <span id="modal_task_name"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true" style="color: var(--tg-text);">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="font-weight-bold" style="color: var(--tg-link);">Bonus Amount: <span id="modal_bonus_amount">$0.00</span></p>
+                <p class="small text-danger">Please provide proof for manual verification (e.g., your TikTok Username or Telegram Username).</p>
+                
+                <form id="claim_bonus_form">
+                    <input type="hidden" id="claim_task_type">
+                    <input type="hidden" id="claim_bonus_value">
+                    <input type="hidden" id="claim_task_id">
+
+                    <div class="form-group">
+                        <label for="claim_proof" style="color: var(--tg-text);">Your Proof (Username/Comment Time):</label>
+                        <input type="text" class="form-control" id="claim_proof" placeholder="Enter your username or proof detail" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirm_bonus_claim_btn" onclick="submitBonusClaim()">Submit Claim</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    // ====================================================================
-    // 🛑 টেলিগ্রাম ইনিশিয়ালাইজেশন এবং ইউজার ডেটা সংগ্রহ 
-    // ====================================================================
+    // **FINAL CONFIGURATION (Admin Controlled Fallbacks)**
+    // -------------------------------------------------------------------------------------------------
+    const YOUR_BOT_USERNAME = "Easyearningsads_bot"; // <<<< আপনার বট ইউজারনেম এখানে দিন
     
+    // Admin Controlled Variables (Fallback values in case Firebase fails to load)
+    let REFERRAL_BONUS_AMOUNT = 0.10; 
+    let MIN_WITHDRAW_AMOUNT = 50.00; 
+    let MIN_REFERRALS_FOR_WITHDRAWAL = 0; 
+    // -------------------------------------------------------------------------------------------------
+
     const WebApp = window.Telegram.WebApp;
     WebApp.ready();
     WebApp.expand(); 
@@ -114,22 +339,24 @@
     const initData = WebApp.initDataUnsafe;
     let currentUserID = null;
     let userTelegramData = {};
-    
+    let referrerID = null; 
+    let totalUserReferrals = 0; 
+
     if (initData && initData.user) {
-        // টেলিগ্রাম ID (Firebase-এ UID হিসেবে ব্যবহার হবে)
         currentUserID = initData.user.id.toString(); 
         userTelegramData = initData.user;
+        
+        // Check for start parameter (Referrer ID)
+        if (initData.start_param && initData.start_param !== currentUserID) {
+            referrerID = initData.start_param;
+        }
     } else {
-        // যদি Telegram ইউজার ডেটা না পাওয়া যায়
         WebApp.showAlert('Error: Cannot verify Telegram user. Please start the app via the bot.');
     }
 
-    // ====================================================================
-    // 🔔 Firebase কনফিগারেশন এবং ইনিশিয়ালাইজেশন 
-    // ====================================================================
-
+    // !!! NOTE: YOUR FIREBASE CONFIGURATION !!!
     const firebaseConfig = {
-      apiKey: "AIzaSyBTbvsww7lrnRPB3hzWD1foDQ6jUPhgfAE",
+      apiKey: "AIzaSyBTbvsww7lrnRPB3hzWD1foDQ6jUPhgfAE", // <<<< আপনার Firebase API Key
       authDomain: "easyearningsads.firebaseapp.com",
       databaseURL: "https://easyearningsads-default-rtdb.firebaseio.com",
       projectId: "easyearningsads",
@@ -142,75 +369,249 @@
     firebase.initializeApp(firebaseConfig);
 
     const database = firebase.database();
-    const functions = firebase.functions();
+    // Monetag SDK function is available as 'show_10117888'
     const MONETAG_SDK_FUNC = window['show_10117888']; 
 
     // ====================================================================
-    // 🔑 ইউজার ডেটা লোড লজিক
+    // 🔑 User Data Load and Referral Initialization
     // ====================================================================
     
     if (currentUserID) {
-        // স্ক্রিন লোড হলে ডেটা লোড শুরু
+        initializeUser(currentUserID, referrerID);
         loadUserData(currentUserID);
         
-        // ইউজার নেম ডিসপ্লে
         const userDisplayName = userTelegramData.first_name || 'User';
-        document.getElementById('user_display_name').textContent = userDisplayName;
+        document.getElementById('p_username').textContent = userTelegramData.username || userTelegramData.first_name || 'N/A';
+        document.getElementById('p_tg_id').textContent = currentUserID;
+        document.getElementById('user_display_name').textContent = userTelegramData.first_name || 'User';
+        
+        // Generate Referral Link
+        const referralLink = `https://t.me/${YOUR_BOT_USERNAME}?start=${currentUserID}`;
+        document.getElementById('referral_link_input').value = referralLink;
     }
 
-    function loadUserData(userId) {
+    function initializeUser(userId, refId) {
         const userRef = database.ref('users/' + userId);
-        
-        // 1. যদি ইউজার Firebase-এ না থাকে, তবে প্রাথমিক ডেটা তৈরি করুন (সিকিউরিটি লজিক Cloud Function এ থাকা ভালো)
-        userRef.once('value', (snapshot) => {
+        userRef.once('value').then((snapshot) => {
             if (!snapshot.exists()) {
-                console.log("Creating initial user data for Telegram ID:", userId);
-                userRef.set({
-                    username: userTelegramData.username || userTelegramData.first_name || 'TG User',
+                // New user registration
+                const newUser = {
+                    telegramId: userId,
+                    username: userTelegramData.username || 'N/A',
+                    firstName: userTelegramData.first_name || 'N/A',
                     current_balance: 0.00,
                     total_earnings: 0.00,
                     ads_viewed_today: 0,
-                    telegram_id: userId,
                     createdAt: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    console.log("Initial data created successfully.");
-                }).catch(err => {
-                    console.error("Error creating initial data:", err);
-                    WebApp.showAlert("Failed to initialize user data. Please try again.");
-                });
-            }
-        });
-
-
-        // 2. রিয়েল-টাইম ডেটা আপডেট লিসেনার
-        userRef.on('value', (snapshot) => {
-            const userData = snapshot.val();
-            
-            if (userData) {
-                document.getElementById('total_earnings_value').textContent = `$ ${userData.total_earnings ? userData.total_earnings.toFixed(2) : '0.00'}`;
-                document.getElementById('current_balance_value').textContent = `$ ${userData.current_balance ? userData.current_balance.toFixed(2) : '0.00'}`;
-                document.getElementById('ads_viewed_today_value').textContent = `${userData.ads_viewed_today || 0} Ads`;
+                };
                 
-                const minWithdraw = 50.00;
-                const withdrawButton = document.getElementById('withdraw_button');
-                
-                if (userData.current_balance >= minWithdraw) {
-                    withdrawButton.textContent = "Request Withdrawal";
-                    withdrawButton.disabled = false;
-                    withdrawButton.classList.remove('btn-danger', 'disabled');
-                    withdrawButton.classList.add('btn-success');
-                } else {
-                    withdrawButton.textContent = `Request Withdrawal (Need $${minWithdraw.toFixed(2)})`;
-                    withdrawButton.disabled = true;
-                    withdrawButton.classList.remove('btn-success');
-                    withdrawButton.classList.add('btn-danger', 'disabled');
+                if (refId && !isNaN(parseInt(refId))) { 
+                    newUser.referredBy = refId;
                 }
+                
+                userRef.set(newUser).then(() => {
+                    if (refId && !isNaN(parseInt(refId)) && refId !== userId) {
+                        rewardReferrer(refId, userId);
+                    }
+                });
+            } else {
+                userRef.update({ lastSeen: firebase.database.ServerValue.TIMESTAMP });
             }
         });
     }
     
+    // Withdrawal Check Helper Function
+    function checkWithdrawalConditions(currentBalance, totalReferrals) {
+        const withdrawButton = document.getElementById('withdraw_button');
+        
+        let canWithdraw = currentBalance >= MIN_WITHDRAW_AMOUNT;
+        let meetsReferralGoal = totalReferrals >= MIN_REFERRALS_FOR_WITHDRAWAL;
+        
+        withdrawButton.classList.remove('btn-danger', 'disabled', 'btn-success');
+        
+        // Update Withdrawal Limit Display
+        let limitText = `$${MIN_WITHDRAW_AMOUNT.toFixed(2)}`;
+        if (MIN_REFERRALS_FOR_WITHDRAWAL > 0) {
+            limitText += ` + ${MIN_REFERRALS_FOR_WITHDRAWAL} Referrals`;
+        }
+        document.getElementById('min_withdraw_limit').textContent = limitText;
+        document.getElementById('modal_min_limit').textContent = limitText;
+
+
+        if (canWithdraw && meetsReferralGoal) {
+            withdrawButton.textContent = "Request Withdrawal";
+            withdrawButton.disabled = false;
+            withdrawButton.classList.add('btn-success');
+        } else {
+            let reason = '';
+            if (!canWithdraw) {
+                reason = `Need $${MIN_WITHDRAW_AMOUNT.toFixed(2)}`;
+            } 
+            if (MIN_REFERRALS_FOR_WITHDRAWAL > 0 && !meetsReferralGoal) {
+                if (!canWithdraw) reason += ' & '; // If both conditions fail
+                reason += `${MIN_REFERRALS_FOR_WITHDRAWAL} Referrals`;
+            }
+            
+            if (!reason) reason = 'Loading Rules...'; // Should only show briefly
+
+            withdrawButton.textContent = `Request Withdrawal (${reason})`;
+            withdrawButton.disabled = true;
+            withdrawButton.classList.add('btn-danger', 'disabled');
+        }
+    }
+
+
+    function loadUserData(userId) {
+        const userRef = database.ref('users/' + userId);
+        const withdrawRef = database.ref('withdrawals').orderByChild('userId').equalTo(userId);
+        const referralEarningRef = database.ref('referral_earnings').orderByChild('referrerId').equalTo(userId);
+
+        // 1. Load Admin Settings (for dynamic withdrawal rules, referral bonus, and links)
+        database.ref('admin_settings').on('value', (settingsSnapshot) => {
+            const settings = settingsSnapshot.val();
+            if (settings) {
+                MIN_WITHDRAW_AMOUNT = settings.minWithdrawalAmount || 50.00;
+                MIN_REFERRALS_FOR_WITHDRAWAL = settings.minReferralsForWithdrawal || 0;
+                REFERRAL_BONUS_AMOUNT = settings.referralBonusAmount || 0.10; 
+
+                // Update referral text with the dynamically loaded amount
+                document.getElementById('referral_bonus_text').textContent = 
+                    `You earn $${REFERRAL_BONUS_AMOUNT.toFixed(2)} for every successful sign-up.`;
+                    
+                // *** এডমিন কন্ট্রোল্ড লিংক লোড করা হচ্ছে ***
+                const links = settings.taskLinks || {};
+                document.getElementById('youtube_link').href = links.youtubeLink || '#';
+                document.getElementById('tiktok_link').href = links.tiktokLink || '#';
+                document.getElementById('telegram_link').href = links.telegramLink || '#';
+                // **********************************************
+
+            } else {
+                 document.getElementById('referral_bonus_text').textContent = 
+                    `You earn $${REFERRAL_BONUS_AMOUNT.toFixed(2)} for every successful sign-up.`; // Fallback display
+            }
+            
+            // 2. Load Referral Data (to get referral count)
+            referralEarningRef.on('value', (refSnapshot) => {
+                const earnings = [];
+                refSnapshot.forEach(childSnapshot => {
+                    earnings.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                
+                totalUserReferrals = earnings.length;
+                const totalReferralEarnings = earnings.reduce((sum, item) => sum + (item.amount || 0), 0);
+
+                document.getElementById('total_referrals_count').textContent = totalUserReferrals;
+                document.getElementById('successful_referrals_count').textContent = totalUserReferrals; 
+                document.getElementById('referral_earnings_value').textContent = `$ ${totalReferralEarnings.toFixed(2)}`;
+
+                // Referral History List Update
+                 const historyList = document.getElementById('referral_history_list');
+                 historyList.innerHTML = '';
+            
+                 if (earnings.length === 0) {
+                      historyList.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: var(--tg-secondary-bg);">No referral earnings yet.</li>`;
+                 } else {
+                     earnings.sort((a, b) => b.timestamp - a.timestamp); 
+                     earnings.forEach(item => {
+                        const date = new Date(item.timestamp).toLocaleDateString();
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        listItem.style.backgroundColor = 'var(--tg-secondary-bg)';
+                        listItem.innerHTML = `
+                            <div>
+                                <strong style="color: var(--tg-text);">+$${(item.amount || 0).toFixed(2)}</strong> - Referred User: <span style="font-size: 0.8em; color: var(--tg-text);">${item.referredUser || 'New User'}</span>
+                            </div>
+                            <span class="badge badge-pill badge-completed">${date}</span>
+                        `;
+                        historyList.appendChild(listItem);
+                    });
+                 }
+                 
+                 // 3. Load User Profile Data (Dashboard & Profile Tab)
+                 userRef.on('value', (userSnapshot) => {
+                     const userData = userSnapshot.val();
+                     if (userData) {
+                         const currentBalance = userData.current_balance || 0.00;
+                         
+                         document.getElementById('current_balance_value').textContent = `$ ${currentBalance.toFixed(2)}`;
+                         document.getElementById('total_earnings_value').textContent = `$ ${userData.total_earnings ? userData.total_earnings.toFixed(2) : '0.00'}`;
+                         document.getElementById('ads_viewed_today_value').textContent = `${userData.ads_viewed_today || 0} Ads`;
+                         document.getElementById('p_total_earnings').textContent = `$ ${userData.total_earnings ? userData.total_earnings.toFixed(2) : '0.00'}`;
+                         if (userData.createdAt) {
+                             document.getElementById('p_joined_on').textContent = new Date(userData.createdAt).toLocaleDateString();
+                         }
+                         document.getElementById('modal_current_balance').textContent = `$ ${currentBalance.toFixed(2)}`;
+                         
+                         // Check Withdrawal Conditions
+                         checkWithdrawalConditions(currentBalance, totalUserReferrals);
+                     }
+                 });
+            });
+        });
+        
+        // Withdrawal History (Profile Tab)
+        withdrawRef.on('value', (snapshot) => {
+            const historyList = document.getElementById('withdrawal_history_list');
+            historyList.innerHTML = '';
+            
+            const withdrawals = [];
+            snapshot.forEach(childSnapshot => {
+                withdrawals.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            });
+            
+            if (withdrawals.length === 0) {
+                 historyList.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: var(--tg-secondary-bg);">No withdrawal requests yet.</li>`;
+                 return;
+            }
+            
+            withdrawals.sort((a, b) => b.timestamp - a.timestamp); 
+
+            withdrawals.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleDateString();
+                const statusClass = item.status === 'Completed' ? 'badge-completed' : 'badge-pending';
+                
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.style.backgroundColor = 'var(--tg-secondary-bg)';
+                listItem.innerHTML = `
+                    <div>
+                        <strong style="color: var(--tg-text);">$${(item.amount || 0).toFixed(2)}</strong> (${item.payoutMethod || 'N/A'}) - <span style="font-size: 0.8em; color: var(--tg-text);">${date}</span>
+                    </div>
+                    <span class="badge badge-pill ${statusClass}">${item.status}</span>
+                `;
+                historyList.appendChild(listItem);
+            });
+        });
+    }
+
+    function rewardReferrer(referrerId, newUserId) {
+        const userRef = database.ref('users/' + referrerId);
+        
+        database.ref('referral_earnings').push({
+            referrerId: referrerId,
+            referredUserId: newUserId,
+            referredUser: userTelegramData.username || userTelegramData.first_name,
+            amount: REFERRAL_BONUS_AMOUNT, // Uses the global, admin-controlled variable
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            // Update referrer's balance
+            userRef.once('value').then((snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    const newBalance = (userData.current_balance || 0) + REFERRAL_BONUS_AMOUNT;
+                    const newTotalEarnings = (userData.total_earnings || 0) + REFERRAL_BONUS_AMOUNT;
+                    
+                    userRef.update({
+                        current_balance: newBalance,
+                        total_earnings: newTotalEarnings
+                    });
+                }
+            });
+        });
+    }
+
     // ====================================================================
-    // 💰 Monetag অ্যাড এবং আর্নিং লজিক (Cloud Function Call)
+    // 💰 Ad Logic
     // ====================================================================
     
     function showRewardedAd() {
@@ -218,68 +619,227 @@
             WebApp.showAlert("Error: System not ready. Please restart the app via the bot.");
             return;
         }
-
-        const adMessage = document.getElementById('ad_message');
-        const adButton = document.getElementById('view_ad_btn');
         
-        adMessage.style.display = 'none';
-        adButton.disabled = true;
-        adButton.textContent = "Ad is loading...";
+        document.getElementById('view_ad_btn').disabled = true;
+        document.getElementById('view_ad_btn').textContent = 'Loading Ad...';
 
-        MONETAG_SDK_FUNC({
-            type: 'end',
-            ymid: currentUserID, // Telegram ID Monetag-এ পাঠানো
-            requestVar: 'ad_view_earn_button' 
-        })
-        .then((result) => {
-            if (result.reward_event_type === 'valued' || result.reward_event_type === 'viewed') {
-                // *** সার্ভারে টাকা যোগ করার ফাংশন কল - এটাই নিরাপত্তা দেয় ***
-                callAddEarningFunction(0.01, 'ad_view_reward');
+        MONETAG_SDK_FUNC.showAd().then(function(adResult) {
+            document.getElementById('view_ad_btn').disabled = false;
+            document.getElementById('view_ad_btn').textContent = 'View Rewarded Ad (Earn $0.01)';
 
-                adMessage.textContent = `Success! Rewarded Ad viewed. Balance update pending.`;
-                adMessage.classList.remove('text-danger');
-                adMessage.classList.add('text-success');
+            if (adResult.status === 'rewarded') {
+                callAddEarningFunction(0.01, 'Ad_View');
+                WebApp.showAlert('Success! $0.01 has been added to your balance.');
+            } else if (adResult.status === 'skipped') {
+                 WebApp.showAlert('Ad skipped. No reward earned.');
             } else {
-                adMessage.textContent = "Ad closed or failed. No reward granted.";
-                adMessage.classList.remove('text-success');
-                adMessage.classList.add('text-danger');
+                 WebApp.showAlert('Ad could not be loaded or was dismissed. Try again later.');
             }
-            adMessage.style.display = 'block';
-            adButton.textContent = "View Next Ad";
-            adButton.disabled = false;
-        })
-        .catch((error) => {
-            console.error("Monetag Ad Error:", error);
-            WebApp.showAlert("Error: Ad failed to load. Try again later.");
-            adButton.textContent = "Try Viewing Ad Again";
-            adButton.disabled = false;
+        }).catch(function(error) {
+            document.getElementById('view_ad_btn').disabled = false;
+            document.getElementById('view_ad_btn').textContent = 'View Rewarded Ad (Earn $0.01)';
+            WebApp.showAlert('An error occurred while loading the ad. Please try again.');
         });
     }
     
     function callAddEarningFunction(amount, source) {
-        // Firebase Cloud Function 'addEarning' কল
-        const addEarning = functions.httpsCallable('addEarning'); 
+        if (!currentUserID) return;
 
-        addEarning({ amount: amount, source: source, telegramId: currentUserID })
-            .then((result) => {
-                console.log("Earning Function Result:", result.data);
-                if (!result.data.success) {
-                    WebApp.showAlert(result.data.message || "An unknown server error occurred."); 
+        const userRef = database.ref('users/' + currentUserID);
+        userRef.transaction((currentData) => {
+            if (currentData) {
+                currentData.current_balance = (currentData.current_balance || 0) + amount;
+                currentData.total_earnings = (currentData.total_earnings || 0) + amount;
+                
+                if (source === 'Ad_View') {
+                    currentData.ads_viewed_today = (currentData.ads_viewed_today || 0) + 1;
                 }
-            })
-            .catch((error) => {
-                console.error("Error calling Cloud Function:", error);
-                WebApp.showAlert("Security Error: Could not connect to the earning server.");
-            });
+            }
+            return currentData;
+        });
     }
 
-    function requestWithdrawal() {
-        WebApp.showConfirm('Confirm withdrawal request? Your balance will be reviewed by admin.', (isConfirmed) => {
-            if (isConfirmed) {
-                // এখানে Cloud Function কল করে উত্তোলনের অনুরোধ পাঠানোর লজিক বসবে
-                WebApp.showAlert("Withdrawal request sent! Admin will review.");
-            }
+
+    // ====================================================================
+    // 💸 Withdrawal Logic
+    // ====================================================================
+    
+    function submitWithdrawal() {
+        const amount = parseFloat(document.getElementById('modal_current_balance').textContent.replace('$', '').trim());
+        const payoutMethod = document.getElementById('payout_method').value;
+        const payoutAddress = document.getElementById('payout_address').value.trim();
+        
+        if (amount < MIN_WITHDRAW_AMOUNT || totalUserReferrals < MIN_REFERRALS_FOR_WITHDRAWAL) {
+             WebApp.showAlert(`Error: You must meet the withdrawal requirements: $${MIN_WITHDRAW_AMOUNT.toFixed(2)} and ${MIN_REFERRALS_FOR_WITHDRAWAL} referrals.`);
+            return;
+        }
+
+        if (!payoutMethod || !payoutAddress) {
+            WebApp.showAlert('Error: Please select a payout method and enter your account details.');
+            return;
+        }
+
+        const confirmBtn = document.getElementById('confirm_payout_btn');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Processing...';
+
+        // 1. Submit withdrawal request to Firebase
+        database.ref('withdrawals').push({
+            userId: currentUserID,
+            username: userTelegramData.username || userTelegramData.first_name,
+            amount: amount,
+            payoutMethod: payoutMethod,
+            payoutAddress: payoutAddress,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            status: 'Pending' 
+        }).then(() => {
+            // 2. Deduct amount from user's balance using transaction
+            const userRef = database.ref('users/' + currentUserID);
+            userRef.transaction((currentData) => {
+                if (currentData) {
+                    currentData.current_balance = (currentData.current_balance || 0) - amount;
+                }
+                return currentData;
+            }).then(() => {
+                // Success
+                $('#withdrawalModal').modal('hide');
+                WebApp.showAlert('Withdrawal request submitted! Your balance has been updated. The Admin will process your request shortly.');
+                
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Confirm Payout';
+            });
+        }).catch(error => {
+            // Error
+            WebApp.showAlert("Error submitting withdrawal request. Try again.");
+            console.error("Withdrawal error:", error);
+            
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm Payout';
         });
+    }
+
+    // ====================================================================
+    // 🎁 Bonus Claim Logic
+    // ====================================================================
+    
+    $('#bonusClaimModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget); 
+        const taskType = button.data('task-type');
+        const bonusAmount = button.data('bonus-amount');
+        const taskId = button.data('task-id');
+        
+        const modal = $(this);
+        modal.find('#modal_task_name').text(taskType);
+        modal.find('#modal_bonus_amount').text(`$${parseFloat(bonusAmount).toFixed(2)}`);
+        
+        modal.find('#claim_task_type').val(taskType);
+        modal.find('#claim_bonus_value').val(bonusAmount);
+        modal.find('#claim_task_id').val(taskId);
+        modal.find('#claim_proof').val(''); 
+    });
+
+    function submitBonusClaim() {
+        const taskType = document.getElementById('claim_task_type').value;
+        const bonusAmount = parseFloat(document.getElementById('claim_bonus_value').value);
+        const taskId = document.getElementById('claim_task_id').value;
+        const claimProof = document.getElementById('claim_proof').value.trim();
+        
+        if (!claimProof) {
+            WebApp.showAlert("Please enter your proof detail (Username or ID).");
+            return;
+        }
+
+        const confirmBtn = document.getElementById('confirm_bonus_claim_btn');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Submitting...';
+
+        // Submit claim request to Firebase 'bonus_claims' collection
+        database.ref('bonus_claims').push({
+            userId: currentUserID,
+            username: userTelegramData.username || userTelegramData.first_name,
+            taskType: taskType,
+            taskId: taskId,
+            bonusAmount: bonusAmount,
+            claimProof: claimProof,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            status: 'Pending' // Admin must manually approve this
+        }).then(() => {
+            // Success
+            $('#bonusClaimModal').modal('hide');
+            WebApp.showAlert(`Bonus claim for ${taskType} submitted successfully! The Admin will review your proof (${claimProof}) and credit $${bonusAmount.toFixed(2)} to your balance.`);
+            
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Submit Claim';
+        }).catch(error => {
+            // Error
+            WebApp.showAlert("Error submitting bonus claim. Try again.");
+            
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Submit Claim';
+        });
+    }
+
+    // ====================================================================
+    // 💬 Support System
+    // ====================================================================
+    
+    document.getElementById('support_form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const subject = document.getElementById('support_subject').value.trim();
+        const message = document.getElementById('support_message').value.trim();
+        
+        if (!subject || !message) {
+            WebApp.showAlert('Please fill in both subject and message fields.');
+            return;
+        }
+        
+        const sendBtn = document.getElementById('send_support_btn');
+        const statusDiv = document.getElementById('support_message_status');
+        
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+        statusDiv.style.display = 'none';
+
+        database.ref('support_tickets').push({
+            userId: currentUserID,
+            username: userTelegramData.username || 'N/A',
+            subject: subject,
+            message: message,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            status: 'New'
+        }).then(() => {
+            statusDiv.textContent = 'Message sent successfully! We will get back to you soon.';
+            statusDiv.style.display = 'block';
+            document.getElementById('support_form').reset();
+        }).catch(error => {
+            statusDiv.textContent = 'Error sending message. Please try again.';
+            statusDiv.style.display = 'block';
+        }).finally(() => {
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Message';
+        });
+    });
+
+    // ====================================================================
+    // 🔗 Referral Utility Functions
+    // ====================================================================
+    
+    function copyReferralLink() {
+        const copyText = document.getElementById("referral_link_input");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); 
+
+        try {
+            document.execCommand("copy");
+            WebApp.showPopup({
+                title: 'Link Copied',
+                message: 'Your unique referral link has been copied to the clipboard!',
+                buttons: [{ id: 'ok', type: 'default', text: 'OK' }]
+            });
+        } catch (err) {
+            WebApp.showAlert('Failed to copy link. Please copy it manually.');
+        }
     }
 </script>
 
