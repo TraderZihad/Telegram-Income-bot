@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Ad Earning Platform</title>
+    <title>Earn Ads - Telegram Mini App (Final Version)</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
@@ -15,110 +18,85 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script> 
 
     <style>
-        /* Shared Styles */
-        body { background-color: #f8f9fa; }
-        .sidebar { background-color: #343a40; }
-        .card-balance { border-left: 5px solid #28a745; box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); }
-        .earning-value { font-size: 2.5rem; font-weight: 700; }
-        .ad-box { background-color: #ecf0f1; border: 2px dashed #95a5a6; min-height: 250px; display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; border-radius: 10px; padding: 20px; }
-        
-        /* Login Specific Styles */
-        .login-page { background-color: #34495e; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background-color: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
-        
-        /* Hide sections initially */
-        #main_dashboard, #loading_screen { display: none; }
+        /* Telegram Theme Variables */
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #000000);
+            --tg-link: var(--tg-theme-link-color, #2481cc);
+            --tg-button: var(--tg-theme-button-color, #2481cc);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f4);
+        }
+        body { 
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            padding-bottom: 50px; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .container { max-width: 600px; }
+        .card { background-color: var(--tg-secondary-bg); border: none; }
+        .card-balance { border-left: 5px solid var(--tg-link); box-shadow: 0 4px 6px rgba(0,0,0,.05); }
+        .earning-value { font-size: 2.5rem; font-weight: 700; color: var(--tg-text); }
+        .ad-box { background-color: var(--tg-bg); border: 2px dashed var(--tg-link); min-height: 250px; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .btn-success { background-color: var(--tg-button); border-color: var(--tg-button); }
+        .btn-success:hover { background-color: #1e7e34; border-color: #1c7430; }
+        .text-danger { color: #dc3545 !important; }
     </style>
 </head>
 <body>
 
-<div id="loading_screen" class="login-page">
-    <div class="spinner-border text-primary" role="status">
-        <span class="sr-only">Loading...</span>
-    </div>
-    <h4 class="ml-3 text-white">Checking login status...</h4>
-</div>
+<main role="main" class="container py-3">
+    <h1 class="h4 pt-3 pb-2 mb-4 border-bottom" style="color: var(--tg-text);">
+        <i class="fas fa-wallet" style="color: var(--tg-link);"></i> Welcome, <span id="user_display_name">...</span>!
+    </h1>
 
-<div id="login_page" class="login-page">
-    <div class="login-box">
-        <h3>Sign in to Earn Ads</h3>
-        <p class="text-muted">Use your Telegram account to login instantly.</p>
+    <div class="row mb-5">
+        <div class="col-12 mb-3">
+            <div class="card card-balance p-3">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-piggy-bank fa-3x mr-3" style="color: var(--tg-link);"></i>
+                    <div>
+                        <div class="font-weight-bold text-uppercase mb-1" style="color: var(--tg-link); font-size: 0.8rem;">Current Balance (USD)</div>
+                        <div class="earning-value" id="current_balance_value">$ 0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 pr-1">
+            <div class="card p-3 text-center">
+                <i class="fas fa-chart-line mb-1" style="color: var(--tg-link);"></i>
+                <div class="small" style="color: var(--tg-text);">Total Earnings</div>
+                <h5 style="color: var(--tg-text);" id="total_earnings_value">$ 0.00</h5>
+            </div>
+        </div>
+        <div class="col-6 pl-1">
+            <div class="card p-3 text-center">
+                <i class="fas fa-eye mb-1" style="color: var(--tg-link);"></i>
+                <div class="small" style="color: var(--tg-text);">Today's Ad Views</div>
+                <h5 style="color: var(--tg-text);" id="ads_viewed_today_value">0 Ads</h5>
+            </div>
+        </div>
+    </div>
+
+    <hr style="background-color: var(--tg-link);">
+
+    <h4 class="mb-3" style="color: var(--tg-text);">📺 View Rewarded Ad</h4>
+    <div class="ad-box mb-5">
+        <p class="lead" style="color: var(--tg-text); font-size: 1rem;">Click the button below to view the Rewarded Ad.</p>
         
-        <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                data-telegram-login="YOUR_BOT_USERNAME" 
-                data-size="large" 
-                data-auth-url="https://yourdomain.com/login_handler.php" 
-                data-request-access="write"></script>
-                
-        <p class="mt-3 small text-danger font-weight-bold">
-            **গুরুত্বপূর্ণ:** এটি কাজ করার জন্য আপনার সার্ভারে **login_handler.php** সেটআপ করতে হবে।
-        </p>
+        <button id="view_ad_btn" class="btn btn-success btn-lg" onclick="showRewardedAd()">
+            <i class="fas fa-play-circle"></i> View Rewarded Ad (Earn $0.01)
+        </button>
+        <div id="ad_message" class="mt-3 font-weight-bold" style="display:none; color: var(--tg-link);"></div>
     </div>
-</div>
 
-<div id="main_dashboard" class="container-fluid">
-    <div class="row">
-        <nav class="col-md-2 d-none d-md-block sidebar py-3">
-            <div class="sidebar-sticky">
-                <h5 class="text-white mb-4"><i class="fas fa-dollar-sign"></i> PANEL</h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link text-white active" href="#"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link text-danger mt-3" href="#" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </div>
-        </nav>
+    <hr style="background-color: var(--tg-link);">
 
-        <main role="main" class="col-md-10 ml-sm-auto px-4">
-            <h1 class="h3 pt-3 pb-2 mb-4 border-bottom">Welcome, <span id="user_display_name">Loading...</span>!</h1>
-
-            <div class="row mb-5">
-                <div class="col-md-5 mb-3">
-                    <div class="card card-balance p-3 bg-white">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col-auto mr-3">
-                                <i class="fas fa-piggy-bank fa-3x text-success"></i>
-                            </div>
-                            <div class="col">
-                                <div class="text-success font-weight-bold text-uppercase mb-1">Current Balance</div>
-                                <div class="earning-value text-dark" id="current_balance_value">$ 0.00</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card card-earning p-3 bg-light">
-                        <i class="fas fa-eye text-primary mb-1"></i>
-                        <div class="text-muted small">Today's Ad Views</div>
-                        <h2 class="text-primary" id="ads_viewed_today_value">0 Ads</h2>
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-
-            <h3 class="mb-3">📺 <i class="fas fa-bullhorn"></i> View Today's Ad</h3>
-            <div class="ad-box mb-5">
-                <p class="lead text-dark">Click the button below to view the Rewarded Ad.</p>
-                
-                <div class="bg-white border rounded p-4 mb-3 w-75" style="min-height: 150px;">
-                    </div>
-                
-                <button id="view_ad_btn" class="btn btn-success btn-lg" onclick="showRewardedAd()">
-                    <i class="fas fa-play-circle"></i> View Rewarded Ad (Earn $0.01)
-                </button>
-                <div id="ad_message" class="mt-3 text-success font-weight-bold" style="display:none;"></div>
-            </div>
-
-            <hr>
-
-            <h3 class="mt-5 mb-3 border-bottom pb-2"><i class="fas fa-money-check-alt"></i> Payout</h3>
-            <div class="card p-4 mb-5">
-                 <p class="text-danger font-weight-bold">Minimum Withdrawal Limit: $ <span id="min_withdraw_limit">50.00</span></p>
-                <button class="btn btn-lg btn-danger disabled" id="withdraw_button" disabled onclick="requestWithdrawal()">Request Withdrawal</button>
-            </div>
-        </main>
+    <h4 class="mt-5 mb-3 border-bottom pb-2" style="color: var(--tg-text);">💸 Payout</h4>
+    <div class="card p-4 mb-5">
+         <p class="font-weight-bold" style="color: #dc3545;">Minimum Withdrawal Limit: $ <span id="min_withdraw_limit">50.00</span></p>
+        <button class="btn btn-lg btn-danger disabled" id="withdraw_button" disabled onclick="requestWithdrawal()">Request Withdrawal</button>
     </div>
-</div>
+</main>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
@@ -126,7 +104,28 @@
 
 <script>
     // ====================================================================
-    // 🔔 Firebase কনফিগারেশন এবং ইনিশিয়ালাইজেশন (আপনার ডেটা)
+    // 🛑 টেলিগ্রাম ইনিশিয়ালাইজেশন এবং ইউজার ডেটা সংগ্রহ 
+    // ====================================================================
+    
+    const WebApp = window.Telegram.WebApp;
+    WebApp.ready();
+    WebApp.expand(); 
+    
+    const initData = WebApp.initDataUnsafe;
+    let currentUserID = null;
+    let userTelegramData = {};
+    
+    if (initData && initData.user) {
+        // টেলিগ্রাম ID (Firebase-এ UID হিসেবে ব্যবহার হবে)
+        currentUserID = initData.user.id.toString(); 
+        userTelegramData = initData.user;
+    } else {
+        // যদি Telegram ইউজার ডেটা না পাওয়া যায়
+        WebApp.showAlert('Error: Cannot verify Telegram user. Please start the app via the bot.');
+    }
+
+    // ====================================================================
+    // 🔔 Firebase কনফিগারেশন এবং ইনিশিয়ালাইজেশন 
     // ====================================================================
 
     const firebaseConfig = {
@@ -142,81 +141,66 @@
 
     firebase.initializeApp(firebaseConfig);
 
-    const auth = firebase.auth();
     const database = firebase.database();
     const functions = firebase.functions();
-    
-    let currentUserID = null;
     const MONETAG_SDK_FUNC = window['show_10117888']; 
 
     // ====================================================================
-    // 🔔 অথেন্টিকেশন ফ্লো এবং ইউজার ডেটা লোড
+    // 🔑 ইউজার ডেটা লোড লজিক
     // ====================================================================
-
-    function showScreen(screenId) {
-        document.getElementById('loading_screen').style.display = 'none';
-        document.getElementById('login_page').style.display = 'none';
-        document.getElementById('main_dashboard').style.display = 'none';
-        document.getElementById(screenId).style.display = 'flex'; // Use flex for centering login/loading
-        if (screenId === 'main_dashboard') {
-            document.getElementById(screenId).style.display = 'block'; // Use block for main content layout
-        }
+    
+    if (currentUserID) {
+        // স্ক্রিন লোড হলে ডেটা লোড শুরু
+        loadUserData(currentUserID);
+        
+        // ইউজার নেম ডিসপ্লে
+        const userDisplayName = userTelegramData.first_name || 'User';
+        document.getElementById('user_display_name').textContent = userDisplayName;
     }
-
-    // A) প্রাথমিক চেক (URL এ টোকেন আছে কিনা)
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-
-    if (token) {
-        // A.1) যদি টোকেন থাকে (login_handler.php থেকে এসেছে)
-        showScreen('loading_screen');
-        auth.signInWithCustomToken(token)
-            .then(() => {
-                // টোকেন ব্যবহার সফল হলে URL থেকে টোকেন সরিয়ে দিন
-                window.history.replaceState(null, null, window.location.pathname);
-            })
-            .catch((error) => {
-                console.error("Custom Token Login Failed:", error);
-                alert("Login failed! Invalid token or server error.");
-                showScreen('login_page');
-            });
-    } else {
-        // A.2) টোকেন না থাকলে Firebase স্ট্যাটাস চেক করুন
-        showScreen('loading_screen');
-    }
-
-    // B) Firebase Auth স্টেট চেকার
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            currentUserID = user.uid;
-            loadUserData(currentUserID);
-            showScreen('main_dashboard');
-        } else if (!token) {
-            // টোকেন নেই এবং লগইনও করা নেই
-            showScreen('login_page');
-        }
-    });
 
     function loadUserData(userId) {
         const userRef = database.ref('users/' + userId);
+        
+        // 1. যদি ইউজার Firebase-এ না থাকে, তবে প্রাথমিক ডেটা তৈরি করুন (সিকিউরিটি লজিক Cloud Function এ থাকা ভালো)
+        userRef.once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                console.log("Creating initial user data for Telegram ID:", userId);
+                userRef.set({
+                    username: userTelegramData.username || userTelegramData.first_name || 'TG User',
+                    current_balance: 0.00,
+                    total_earnings: 0.00,
+                    ads_viewed_today: 0,
+                    telegram_id: userId,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    console.log("Initial data created successfully.");
+                }).catch(err => {
+                    console.error("Error creating initial data:", err);
+                    WebApp.showAlert("Failed to initialize user data. Please try again.");
+                });
+            }
+        });
 
+
+        // 2. রিয়েল-টাইম ডেটা আপডেট লিসেনার
         userRef.on('value', (snapshot) => {
             const userData = snapshot.val();
             
             if (userData) {
-                document.getElementById('user_display_name').textContent = userData.username || 'User';
+                document.getElementById('total_earnings_value').textContent = `$ ${userData.total_earnings ? userData.total_earnings.toFixed(2) : '0.00'}`;
                 document.getElementById('current_balance_value').textContent = `$ ${userData.current_balance ? userData.current_balance.toFixed(2) : '0.00'}`;
                 document.getElementById('ads_viewed_today_value').textContent = `${userData.ads_viewed_today || 0} Ads`;
                 
                 const minWithdraw = 50.00;
                 const withdrawButton = document.getElementById('withdraw_button');
+                
                 if (userData.current_balance >= minWithdraw) {
                     withdrawButton.textContent = "Request Withdrawal";
                     withdrawButton.disabled = false;
                     withdrawButton.classList.remove('btn-danger', 'disabled');
                     withdrawButton.classList.add('btn-success');
                 } else {
-                    withdrawButton.textContent = `Request Withdrawal (Insufficient Balance - Need $${minWithdraw.toFixed(2)})`;
+                    withdrawButton.textContent = `Request Withdrawal (Need $${minWithdraw.toFixed(2)})`;
                     withdrawButton.disabled = true;
                     withdrawButton.classList.remove('btn-success');
                     withdrawButton.classList.add('btn-danger', 'disabled');
@@ -224,23 +208,14 @@
             }
         });
     }
-
-    function logoutUser() {
-        auth.signOut().then(() => {
-            window.location.reload(); // পেজ রিলোড করে লগইন পেজে নিয়ে যাবে
-        }).catch((error) => {
-            console.error("Logout Failed:", error);
-            alert("Logout failed.");
-        });
-    }
-
+    
     // ====================================================================
-    // 💰 Monetag অ্যাড এবং আর্নিং লজিক
+    // 💰 Monetag অ্যাড এবং আর্নিং লজিক (Cloud Function Call)
     // ====================================================================
     
     function showRewardedAd() {
         if (!currentUserID || !MONETAG_SDK_FUNC) {
-            alert("Error: System not ready or user not logged in.");
+            WebApp.showAlert("Error: System not ready. Please restart the app via the bot.");
             return;
         }
 
@@ -253,12 +228,12 @@
 
         MONETAG_SDK_FUNC({
             type: 'end',
-            ymid: currentUserID, 
+            ymid: currentUserID, // Telegram ID Monetag-এ পাঠানো
             requestVar: 'ad_view_earn_button' 
         })
         .then((result) => {
             if (result.reward_event_type === 'valued' || result.reward_event_type === 'viewed') {
-                // *** সার্ভারে টাকা যোগ করার ফাংশন কল (Cloud Function) ***
+                // *** সার্ভারে টাকা যোগ করার ফাংশন কল - এটাই নিরাপত্তা দেয় ***
                 callAddEarningFunction(0.01, 'ad_view_reward');
 
                 adMessage.textContent = `Success! Rewarded Ad viewed. Balance update pending.`;
@@ -275,39 +250,36 @@
         })
         .catch((error) => {
             console.error("Monetag Ad Error:", error);
-            adMessage.textContent = "Error: Ad failed to load. Try again later.";
-            adMessage.classList.remove('text-success');
-            adMessage.classList.add('text-danger');
-            adMessage.style.display = 'block';
+            WebApp.showAlert("Error: Ad failed to load. Try again later.");
             adButton.textContent = "Try Viewing Ad Again";
             adButton.disabled = false;
         });
     }
     
     function callAddEarningFunction(amount, source) {
+        // Firebase Cloud Function 'addEarning' কল
         const addEarning = functions.httpsCallable('addEarning'); 
 
-        addEarning({ amount: amount, source: source })
+        addEarning({ amount: amount, source: source, telegramId: currentUserID })
             .then((result) => {
                 console.log("Earning Function Result:", result.data);
                 if (!result.data.success) {
-                    // যদি Cloud Function থেকে কোনো error আসে (যেমন: দৈনিক সীমা)
-                    alert(result.data.message || "An unknown error occurred on the server."); 
+                    WebApp.showAlert(result.data.message || "An unknown server error occurred."); 
                 }
             })
             .catch((error) => {
                 console.error("Error calling Cloud Function:", error);
-                alert("Security Error: Check Cloud Functions deployment.");
+                WebApp.showAlert("Security Error: Could not connect to the earning server.");
             });
     }
 
     function requestWithdrawal() {
-        const confirmRequest = confirm("Confirm withdrawal request? Your balance will be reviewed by admin.");
-        
-        if (confirmRequest) {
-            // এখানে Cloud Function কল করে উত্তোলনের অনুরোধ পাঠানোর লজিক বসবে
-            alert("Withdrawal request sent! Admin will review.");
-        }
+        WebApp.showConfirm('Confirm withdrawal request? Your balance will be reviewed by admin.', (isConfirmed) => {
+            if (isConfirmed) {
+                // এখানে Cloud Function কল করে উত্তোলনের অনুরোধ পাঠানোর লজিক বসবে
+                WebApp.showAlert("Withdrawal request sent! Admin will review.");
+            }
+        });
     }
 </script>
 
