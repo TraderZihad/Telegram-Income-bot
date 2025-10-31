@@ -611,7 +611,7 @@
     }
 
     // ====================================================================
-    // 💰 Ad Logic
+    // 💰 Ad Logic (Ad Loading Fix Applied Here)
     // ====================================================================
     
     function showRewardedAd() {
@@ -620,12 +620,23 @@
             return;
         }
         
-        document.getElementById('view_ad_btn').disabled = true;
-        document.getElementById('view_ad_btn').textContent = 'Loading Ad...';
+        const adBtn = document.getElementById('view_ad_btn');
+        adBtn.disabled = true;
+        adBtn.textContent = 'Loading Ad... Please Wait (Max 30s)'; // লোডিং বার্তা আপডেট করা হলো
+
+        // 🚨 Add a Timeout for Slow Loading (30 seconds)
+        const loadingTimeout = setTimeout(() => {
+            adBtn.disabled = false;
+            adBtn.textContent = 'View Rewarded Ad (Earn $0.01)';
+            WebApp.showAlert('Ad Loading Timeout: The ad took too long to load. Please check your internet connection and try again.');
+        }, 30000); // 30 seconds timeout
+        
 
         MONETAG_SDK_FUNC.showAd().then(function(adResult) {
-            document.getElementById('view_ad_btn').disabled = false;
-            document.getElementById('view_ad_btn').textContent = 'View Rewarded Ad (Earn $0.01)';
+            clearTimeout(loadingTimeout); // Clear timeout if ad loads successfully
+            
+            adBtn.disabled = false;
+            adBtn.textContent = 'View Rewarded Ad (Earn $0.01)';
 
             if (adResult.status === 'rewarded') {
                 callAddEarningFunction(0.01, 'Ad_View');
@@ -636,8 +647,10 @@
                  WebApp.showAlert('Ad could not be loaded or was dismissed. Try again later.');
             }
         }).catch(function(error) {
-            document.getElementById('view_ad_btn').disabled = false;
-            document.getElementById('view_ad_btn').textContent = 'View Rewarded Ad (Earn $0.01)';
+            clearTimeout(loadingTimeout); // Clear timeout on error
+            
+            adBtn.disabled = false;
+            adBtn.textContent = 'View Rewarded Ad (Earn $0.01)';
             WebApp.showAlert('An error occurred while loading the ad. Please try again.');
         });
     }
