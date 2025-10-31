@@ -3,1237 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easy Earning Ads</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script> 
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> 
+    <title>Complete Ad Earning Platform</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <script src='//libtl.com/sdk.js' data-zone='10117888' data-sdk='show_10117888'></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script> 
 
     <style>
-        /* Telegram Theme Variables and Global Reset */
-        :root {
-            --tg-theme-bg-color: #f8f8fc;
-            --tg-theme-text-color: #333333;
-            --tg-theme-link-color: #5d5edd;
-            --tg-theme-secondary-bg-color: #eef1f6;
-            --tg-theme-button-color: #5d5edd;
-            --tg-theme-button-text-color: #ffffff;
-            --primary-green: #27ae60;
-            --primary-red: #e74c3c;
-            --text-light: #7f8c8d;
-            --premium-gold: #f39c12;
-            --active-green: #2ecc71;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif; 
-            margin: 0;
-            padding: 0;
-            background-color: var(--tg-theme-bg-color); 
-            color: var(--tg-theme-text-color);
-            -webkit-font-smoothing: antialiased; 
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .container {
-            padding: 10px 15px;
-        }
-        .header {
-            padding: 18px 10px; 
-            text-align: center;
-            font-size: 20px; 
-            font-weight: 700; 
-            color: var(--tg-theme-text-color); 
-            margin-bottom: 15px; 
-        }
-        .balance-box {
-            background: linear-gradient(135deg, var(--tg-theme-secondary-bg-color) 0%, #ffffff 100%);
-            padding: 28px 20px; 
-            border-radius: 15px; 
-            margin-bottom: 25px; 
-            text-align: center;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); 
-            border: 1px solid #e5e8ef;
-        }
-        .balance-box h3 {
-            margin: 0 0 8px 0; 
-            color: var(--text-light);
-            font-size: 15px;
-            text-transform: uppercase; 
-            letter-spacing: 0.8px;
-        }
-        .balance-amount {
-            font-size: 40px; 
-            font-weight: 800; 
-            color: var(--primary-green); 
-            letter-spacing: 1.5px;
-        }
-
-        /* Navigation Buttons (Tabs) */
-        .nav-buttons {
-            display: flex; 
-            justify-content: space-around; 
-            margin-bottom: 25px; 
-            padding: 0 5px;
-            background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            overflow-x: auto; 
-        }
-        .nav-buttons button {
-            flex-shrink: 0; 
-            background: none;
-            color: var(--text-light);
-            border: none;
-            padding: 14px 5px; 
-            font-size: 14px;
-            font-weight: 600;
-            border-bottom: 3px solid transparent;
-            transition: color 0.2s, border-bottom 0.2s, background-color 0.2s;
-            border-radius: 8px; 
-            white-space: nowrap;
-            margin: 0 2px;
-        }
-        .nav-buttons button.active {
-            color: var(--tg-theme-link-color);
-            background-color: var(--tg-theme-bg-color); 
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Card and Utility Styling */
-        .task-card {
-            background-color: var(--tg-theme-secondary-bg-color);
-            padding: 18px; 
-            border-radius: 12px; 
-            margin-bottom: 15px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06); 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .package-card {
-            background-color: var(--tg-theme-bg-color);
-            border: 2px solid var(--premium-gold);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);
-            position: relative;
-        }
-        .active-package-card {
-            border: 3px solid var(--active-green); 
-            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4); 
-        }
-        .active-package-card::before {
-            content: "YOUR ACTIVE PLAN ✔️";
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--active-green);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .active-package-card h4 {
-             color: var(--active-green);
-        }
-        .package-card h4 {
-            color: var(--premium-gold);
-            font-size: 22px;
-            margin-bottom: 5px;
-        }
-        .package-card .price {
-            font-size: 30px;
-            font-weight: 800;
-            color: var(--tg-theme-text-color);
-            margin-bottom: 15px;
-        }
-        .package-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 20px 0;
-            text-align: left;
-        }
-        .package-card ul li {
-            font-size: 15px;
-            margin-bottom: 8px;
-            color: var(--tg-theme-text-color);
-        }
-        .package-card ul li::before {
-            content: "✨";
-            margin-right: 8px;
-        }
+        /* Shared Styles */
+        body { background-color: #f8f9fa; }
+        .sidebar { background-color: #343a40; }
+        .card-balance { border-left: 5px solid #28a745; box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); }
+        .earning-value { font-size: 2.5rem; font-weight: 700; }
+        .ad-box { background-color: #ecf0f1; border: 2px dashed #95a5a6; min-height: 250px; display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; border-radius: 10px; padding: 20px; }
         
-        /* Button Styles */
-        .task-card button, .package-card button, .full-width-btn {
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px; 
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: opacity 0.2s, transform 0.1s;
-        }
-        .full-width-btn {
-            width: 100%;
-            padding: 15px;
-            margin-top: 10px;
-            font-size: 16px;
-        }
-        .btn-green {
-            background-color: var(--primary-green) !important;
-        }
-        .btn-upgrade {
-            background-color: var(--premium-gold);
-            color: var(--tg-theme-button-text-color);
-        }
-        .btn-active-plan {
-            background-color: var(--active-green) !important;
-            cursor: default !important;
-            opacity: 0.8;
-        }
-
-        /* Form and Utility Styling */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-size: 15px;
-        }
-        .info-box {
-            background-color: #fff3cd; 
-            color: #856404; 
-            padding: 15px;
-            border: 1px solid #ffeeba;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .referral-link-box {
-            background-color: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 8px;
-            word-break: break-all;
-            margin-bottom: 20px;
-        }
-        .referral-link-box code {
-            display: block;
-            background: var(--tg-theme-bg-color);
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
+        /* Login Specific Styles */
+        .login-page { background-color: #34495e; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background-color: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
         
-        /* Profile Grid Styling (User Data Page) */
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .profile-stat-card {
-            background-color: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        .profile-stat-card h5 {
-            margin: 0 0 5px 0;
-            font-size: 13px;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .profile-stat-card .value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--tg-theme-text-color);
-        }
-        .value.green {
-            color: var(--primary-green);
-        }
-        .value.red {
-            color: var(--primary-red);
-        }
-
-        /* User Info Card */
-        .user-info-card {
-            background-color: var(--tg-theme-secondary-bg-color);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-        }
-        .user-info-card strong {
-            font-weight: 600;
-            color: var(--tg-theme-text-color);
-        }
-        .user-info-card p {
-            margin: 8px 0;
-            font-size: 15px;
-            border-bottom: 1px dashed #e0e0e0;
-            padding-bottom: 5px;
-        }
-        .user-info-card p:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        /* Payment Method Cards */
-        .payment-method-card {
-            background-color: var(--tg-theme-bg-color); 
-            border: 2px solid var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            cursor: pointer;
-        }
-        .payment-method-card:hover {
-            border-color: var(--tg-theme-link-color);
-        }
-        .payment-method-card.selected {
-            border: 2px solid var(--primary-green);
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
-        }
-        
-        .method-details {
-            display: flex;
-            align-items: center;
-        }
-        .method-icon {
-            font-size: 24px;
-            margin-right: 12px;
-        }
-        .method-info span {
-            display: block;
-            font-weight: 600;
-            font-size: 15px;
-            color: var(--tg-theme-text-color);
-        }
-        .method-info small {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-        .btn-select-method {
-            padding: 8px 15px;
-            font-size: 13px;
-            font-weight: 600;
-            min-width: 80px;
-        }
-        
-        /* 🏆 Leaderboard Table Styling 🏆 */
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        .leaderboard-table th, .leaderboard-table td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
-            font-size: 14px;
-        }
-        .leaderboard-table th {
-            background-color: var(--tg-theme-secondary-bg-color);
-            color: var(--tg-theme-link-color);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .leaderboard-table tbody tr:nth-child(odd) {
-            background-color: var(--tg-theme-bg-color);
-        }
-        .rank-icon {
-            font-size: 18px;
-        }
-        .leaderboard-table .rank-cell {
-            font-weight: 800;
-            text-align: center;
-        }
-        .leaderboard-table .name-cell {
-            font-weight: 600;
-        }
-        .leaderboard-table .plan-cell {
-            font-weight: 500;
-            font-size: 12px;
-        }
-        .leaderboard-table .current-user-row {
-            background-color: #e6e6fa !important; 
-            border: 2px solid var(--tg-theme-link-color);
-        }
+        /* Hide sections initially */
+        #main_dashboard, #loading_screen { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-       Easy Earning Ads💎
+<div id="loading_screen" class="login-page">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
     </div>
+    <h4 class="ml-3 text-white">Checking login status...</h4>
+</div>
 
-    <div class="container">
-
-        <div class="balance-box">
-            <h3>TOTAL EARNED BALANCE (USD)</h3>
-            <p class="balance-amount" id="current-balance">$0.00</p>
-        </div>
-
-        <div class="nav-buttons">
-            <button id="nav-tasks" class="active" onclick="showSection('tasks', this)">Tasks</button>
-            <button id="nav-premium" onclick="showSection('premium', this)">⭐ Premium</button>
-            <button id="nav-withdraw" onclick="showSection('withdraw', this)">Withdraw</button>
-            <button id="nav-leaderboard" onclick="showSection('leaderboard', this)">🏆 Leaderboard</button> 
-            <button id="nav-profile" onclick="showSection('profile', this)">Profile</button>
-            <button id="nav-referral" onclick="showSection('referral', this)">Referral</button>
-            <button id="nav-support" onclick="showSection('support', this)">Support</button>
-        </div>
-
-        <div class="section" id="tasks-section">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">💰 Earning Tasks</h3>
-            
-            <div class="task-card">
-                <div>
-                    <h4>Daily Bonus Claim</h4>
-                    <p>Click to get your daily reward.</p>
-                </div>
-                <button class="btn-green" id="daily-bonus-btn" onclick="claimDailyBonus()"></button> 
-            </div>
-
-            <div class="task-card" id="ad-task-card">
-                <div>
-                    <h4 id="ad-task-title"></h4> 
-                    <p>Ads Left: <span id="ad-limit">0</span> | Earn: $<span id="earning-per-ad">0.000</span> per ad</p> 
-                    <p id="low-earning-warning" style="color: var(--primary-red); font-weight: 600;">(Standard Earning Rate - **Upgrade for 10X Higher CPM** ⚠️)</p>
-                </div>
-                <button id="start-ad-btn" onclick="startAdTask()">Start Ad</button>
-            </div>
-
-            <div id="monetag-ad-container" style="display:none; text-align:center; padding: 20px;">
-                <h4>Loading High CPM Ad...</h4>
-            </div>
-
-            <div class="task-card" id="premium-ad-teaser" style="border: 2px dashed var(--premium-gold); padding: 25px 18px; display: flex; align-items: center;">
-                <div>
-                    <h4 style="color: var(--premium-gold);">🚀 Unlock Premium Ad Earning</h4>
-                    <p style="color: var(--tg-theme-text-color); font-weight: 500; font-size: 15px;">Get **10X Higher Income** and up to 30 Ads/Day!</p>
-                </div>
-                <button class="btn-upgrade" onclick="showSection('premium', document.getElementById('nav-premium'))">Upgrade</button>
-            </div>
-
-
-            <div class="task-card">
-                <div>
-                    <h4>Watch YouTube Videos 📺</h4>
-                    <p>Reward: <span id="youtube-reward-text">$0.00</span> per video.</p>
-                </div>
-                <button onclick="startYoutubeTask()">Watch Video</button>
-            </div>
-        </div>
-
-        <div class="section" id="premium-section" style="display: none;">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">✨ Upgrade Your Earning Plan for High CPM!</h3>
-            <p style="font-size: 15px; color: var(--text-light); margin-bottom: 25px;">All plans provide **lifetime high-yield access**.</p>
-
-            <div class="package-card active-package-card" id="package-basic">
-                <h4>Basic (Free)</h4>
-                <p class="price">$0.00 <span style="font-size: 16px; font-weight: 500;">(Standard Low Earning)</span></p>
-                <ul>
-                    <li>✨ **Daily Ads:** <span id="basic-limit">5</span> Ads/Day (Free Limit)</li>
-                    <li>✨ **Income:** Standard Earning Rate **(<span id="basic-rate">2X</span> Base)**</li>
-                    <li>✨ **Access:** Always Active</li>
-                </ul>
-                <button class="btn-active-plan" disabled>Active Plan</button>
-            </div>
-
-
-            <div class="package-card" id="package-standard-pro">
-                <h4>Standard Pro 📈</h4>
-                <p class="price">$5.00 <span style="font-size: 16px; font-weight: 500;">(One Time Fee)</span></p>
-                <ul>
-                    <li>✨ **Daily Ads:** <span id="standard-limit">15</span> Ads/Day (Maximized Limit)</li>
-                    <li>✨ **Income:** **<span id="standard-rate">5X</span> High Earning Rate!** (High CPC/CPM)</li>
-                    <li>✨ **Access:** Lifetime Validity & Priority Support</li>
-                </ul>
-                <button onclick="selectPackage('Standard Pro', 5.00)">Buy Now $5.00</button>
-            </div>
-
-            <div class="package-card" id="package-vip-ultimate">
-                <h4>VIP Ultimate 🚀</h4>
-                <p class="price">$10.00 <span style="font-size: 16px; font-weight: 500;">(One Time Fee)</span></p>
-                <ul>
-                    <li>✨ **Daily Ads:** <span id="vip-limit">30</span> Ads/Day (Maximum Available Limit)</li>
-                    <li>✨ **Income:** **<span id="vip-rate">10X</span> Extreme Earning Rate!** (Highest CPC/CPM)</li>
-                    <li>✨ **Access:** Lifetime Validity & **Fastest Payout Priority**</li>
-                </ul>
-                <button onclick="selectPackage('VIP Ultimate', 10.00)">Buy Now $10.00</button>
-            </div>
-
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 35px; font-size: 18px;">💳 Select Payment Options</h3>
-            <div id="payment-methods-list">
-                <p style="color: var(--text-light); text-align: center;">Please select a package above to view payment methods.</p>
-            </div>
-            
-            <button id="final-purchase-btn" style="display: none; width: 100%; padding: 15px; margin-top: 20px;" onclick="confirmPurchase()">Confirm Purchase (USD)</button>
-
-        </div>
-
-        <div class="section" id="withdraw-section" style="display: none;">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">💸 Crypto Withdrawal (USDT Only)</h3>
-            
-            <div class="info-box">
-                **Minimum Withdrawal:** $<span id="min-withdraw-amount">0.00</span> USDT. Fees may apply. Current Balance: $<span id="withdraw-balance">0.00</span>.
-            </div>
-
-            <form id="withdrawal-form">
-                <div class="form-group">
-                    <label for="withdraw-amount">Amount (USDT)</label>
-                    <input type="number" id="withdraw-amount" placeholder="Enter amount" min="5.00" step="0.01" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="withdraw-network">Network</label>
-                    <select id="withdraw-network" required>
-                        <option value="">Select Network</option>
-                        <option value="TRC20">USDT (TRC20) - Fast & Low Fee</option>
-                        <option value="BEP20">USDT (BEP20 / BSC) - Fast</option>
-                        <option value="ERC20">USDT (ERC20) - High Fee</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="wallet-address">Wallet Address (USDT)</label>
-                    <input type="text" id="wallet-address" placeholder="TRC20/BEP20 Address" required>
-                </div>
-                
-                <button type="submit" class="full-width-btn btn-green">Request Withdrawal</button>
-            </form>
-        </div>
+<div id="login_page" class="login-page">
+    <div class="login-box">
+        <h3>Sign in to Earn Ads</h3>
+        <p class="text-muted">Use your Telegram account to login instantly.</p>
         
-        <div class="section" id="leaderboard-section" style="display: none;">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">🏆 Top Earners Leaderboard</h3>
-            <p style="font-size: 14px; color: var(--text-light); margin-bottom: 20px;">Ranking based on **Lifetime Earned** (Total Earnings).</p>
-            
-            <div class="info-box" style="background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; text-align: center;">
-                **Your Rank: <span id="my-rank">N/A</span>** | **Your Lifetime Earned: $<span id="my-lifetime-earned">0.00</span>**
-            </div>
-
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th style="width: 10%;">Rank</th>
-                        <th style="width: 40%;">User</th>
-                        <th style="width: 20%;">Plan</th>
-                        <th style="width: 30%; text-align: right;">Total Earned</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr><td colspan="4" style="text-align: center;">Loading Top Earners...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section" id="profile-section" style="display: none;">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 20px;">👤 My Account Details</h3>
-
-            <div class="user-info-card">
-                <h4 style="margin-top: 0; color: var(--tg-theme-link-color);">User Identity (Auto Login)</h4>
-                <p>
-                    <strong>Name:</strong> <span id="profile-full-name">-- Loading --</span>
-                </p>
-                <p>
-                    <strong>Telegram Username:</strong> <span id="profile-tg-username">-- Loading --</span>
-                </p>
-                <p>
-                    <strong>Telegram User ID:</strong> <span id="profile-tg-id">-- Loading --</span>
-                </p>
-                <p>
-                    <strong>Subscription Plan:</strong> 
-                    <span id="premium-status" style="font-weight: 700;">Basic (Free)</span>
-                </p>
-                <p>
-                    <strong>Member Since:</strong> <span id="profile-join-date">Loading...</span>
-                </p>
-            </div>
-            
-            <h3 style="color: var(--tg-theme-text-color); font-size: 20px;">💰 Earning Statistics</h3>
-            
-            <div class="profile-grid">
+        <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                data-telegram-login="YOUR_BOT_USERNAME" 
+                data-size="large" 
+                data-auth-url="https://yourdomain.com/login_handler.php" 
+                data-request-access="write"></script>
                 
-                <div class="profile-stat-card">
-                    <h5>Current Balance</h5>
-                    <p class="value green" id="profile-current-balance">$0.00</p>
-                </div>
-
-                <div class="profile-stat-card">
-                    <h5>Lifetime Earnings</h5>
-                    <p class="value green" id="profile-lifetime-earned">$0.00</p>
-                </div>
-
-                <div class="profile-stat-card">
-                    <h5>Total Withdrawn</h5>
-                    <p class="value red" id="profile-total-withdrawn">$0.00</p>
-                </div>
-
-                <div class="profile-stat-card">
-                    <h5>Referral Bonus</h5>
-                    <p class="value green" id="profile-referral-earned">$0.00</p>
-                </div>
-            </div>
-            
-            <h4 style="color: var(--tg-theme-text-color); font-size: 17px; margin-top: 25px;">Transaction History</h4>
-            <div class="task-card" style="display: block;">
-                <p style="text-align: center; color: var(--text-light);">No recent transactions found.</p>
-            </div>
-        </div>
-        
-        <div class="section" id="referral-section" style="display: none;">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">🔗 Referral System</h3>
-            
-            <div class="info-box" style="background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;">
-                Invite users and earn **<span id="referral-rate">20%</span>** of their ad earnings for life!
-            </div>
-
-            <div class="referral-link-box">
-                <p style="margin-top: 0;">**Your Unique Referral Link:**</p>
-                <code id="referral-link">Loading Referral Link...</code>
-            </div>
-            
-            <button class="full-width-btn" onclick="copyReferralLink()">Copy Link</button>
-
-            <h4 style="color: var(--tg-theme-text-color); font-size: 17px; margin-top: 30px;">Your Statistics</h4>
-            <div class="task-card" style="display: block;">
-                <p style="margin-bottom: 12px;">**Total Referred Users:** <span id="ref-count">0</span> Users</p>
-                <p>**Total Referral Earnings:** <span id="ref-earnings" style="color: var(--primary-green); font-weight: 600;">$0.00</span></p>
-            </div>
-        </div>
-        
-        <div class="section" id="support-section" style="display: none;">
-            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">📞 Support & Helpdesk</h3>
-
-            <div class="info-box" style="background-color: #f7e0ef; color: #8e44ad; border-color: #f0e6f7;">
-                If you have any payment or account issues, please contact our official support channel.
-            </div>
-
-            <a id="support-link" href="#" target="_blank" class="full-width-btn" style="text-decoration: none; display: block; background-color: var(--tg-theme-link-color);">
-                Contact Support on Telegram
-            </a>
-            
-            <h4 style="color: var(--tg-theme-text-color); font-size: 17px; margin-top: 30px;">FAQs / Help</h4>
-             <div class="task-card" style="display: block;">
-                <p style="margin-bottom: 12px;">**Working Hours:** 10:00 AM - 10:00 PM (GMT+6)</p>
-                <p>**Official Channel:** <span id="official-channel-name">@easyearningsads_bot</span></p>
-            </div>
-        </div>
-
+        <p class="mt-3 small text-danger font-weight-bold">
+            **গুরুত্বপূর্ণ:** এটি কাজ করার জন্য আপনার সার্ভারে **login_handler.php** সেটআপ করতে হবে।
+        </p>
     </div>
+</div>
 
-    <script>
-        const WebApp = window.Telegram.WebApp;
-        WebApp.ready(); 
+<div id="main_dashboard" class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block sidebar py-3">
+            <div class="sidebar-sticky">
+                <h5 class="text-white mb-4"><i class="fas fa-dollar-sign"></i> PANEL</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link text-white active" href="#"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger mt-3" href="#" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </nav>
 
-        // ----------------------------------------------------
-        // 🟢 1. FIREBASE CONFIGURATION & INITIALIZATION
-        // ----------------------------------------------------
-        
-        // ✅ YOUR LIVE CONFIGURATION (User provided)
-       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBTbvsww7lrnRPB3hzWD1foDQ6jUPhgfAE",
-  authDomain: "easyearningsads.firebaseapp.com",
-  projectId: "easyearningsads",
-  storageBucket: "easyearningsads.firebasestorage.app",
-  messagingSenderId: "106083149623",
-  appId: "1:106083149623:web:4d058e482126264d0b1cb2",
-  measurementId: "G-YEHPMTSG02"
-};
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = app.firestore();
-        // ----------------------------------------------------
-        
-        // 🚨 CONFIG UPDATES FROM USER INPUT 🚨
-        const MONETAG_ZONE_ID = '10117888'; 
-        const BOT_USERNAME = 'easyearningsads_bot'; 
-        const SUPPORT_LINK = `https://t.me/${BOT_USERNAME}`; 
-        // -------------------------------------
-        
-        // --- PLATFORM CONFIG (Default values, will be loaded from Firestore) ---
-        let ADMIN_CONFIG = {
-            DAILY_BONUS_REWARD: 0.15,
-            YOUTUBE_REWARD: 0.08,
-            MIN_WITHDRAWAL: 5.00,
-            REFERRAL_RATE: '20%',
-            SUPPORT_TELEGRAM_LINK: SUPPORT_LINK, 
-            'Basic': { limit: 5, earning: 0.005, rate: '2X', price: 0.00 },
-            'Standard Pro': { limit: 15, earning: 0.025, rate: '5X', price: 5.00 },
-            'VIP Ultimate': { limit: 30, earning: 0.050, rate: '10X', price: 10.00 }
-        };
-        
-        const ADMIN_PAYMENT_METHODS = [
-            { name: 'Bkash', details: 'Local Payment (BDT)', icon: '💰', type: 'fiat' },
-            { name: 'Nagad', details: 'Local Payment (BDT)', icon: '💰', type: 'fiat' },
-            { name: 'USDT (TRC20)', details: 'Tron Network', icon: '🚀', type: 'crypto' },
-            { name: 'USDT (BEP20 / BSC)', details: 'Binance Smart Chain', icon: '🟡', type: 'crypto' }
-        ];
+        <main role="main" class="col-md-10 ml-sm-auto px-4">
+            <h1 class="h3 pt-3 pb-2 mb-4 border-bottom">Welcome, <span id="user_display_name">Loading...</span>!</h1>
 
-        // --- USER STATE (Will be loaded from Firestore) ---
-        let userSubscription = 'Basic'; 
-        let adsRemaining = 0; 
-        let currentBalance = 0.00; 
-        let totalLifetimeEarned = 0.00; 
-        let totalWithdrawn = 0.00;
-        let totalReferralEarned = 0.00;
-        let joinDate = "Loading..."; 
-        
-        let selectedPackage = null;
-        let selectedMethod = null;
-        let telegramUserId = null;
-        let telegramUserFirstName = "User"; 
-        let telegramUserLastName = ""; 
-
-
-        // ----------------------------------------------------
-        // 🟢 FIREBASE DATA LOADING & SAVING LOGIC
-        // ----------------------------------------------------
-
-        async function loadUserData() {
-            if (!telegramUserId) return;
-            
-            try {
-                WebApp.showMainButton();
-                WebApp.MainButton.setText('LOADING DATA...');
-                WebApp.MainButton.showProgress(true);
-
-                // 1. Load Global Config
-                const configDoc = await db.collection('settings').doc('global').get();
-                if (configDoc.exists) {
-                    ADMIN_CONFIG = { ...ADMIN_CONFIG, ...configDoc.data() };
-                    
-                    if(ADMIN_CONFIG.BASIC_EARNING) ADMIN_CONFIG['Basic'].earning = ADMIN_CONFIG.BASIC_EARNING;
-                    if(ADMIN_CONFIG.STANDARD_EARNING) ADMIN_CONFIG['Standard Pro'].earning = ADMIN_CONFIG.STANDARD_EARNING;
-                    if(ADMIN_CONFIG.VIP_EARNING) ADMIN_CONFIG['VIP Ultimate'].earning = ADMIN_CONFIG.VIP_EARNING;
-                }
-                
-                // 2. Load User Specific Data
-                const userDoc = await db.collection('users').doc(String(telegramUserId)).get();
-                if (userDoc.exists) {
-                    const data = userDoc.data();
-                    userSubscription = data.plan || 'Basic';
-                    currentBalance = data.balance || 0.00;
-                    
-                    const currentPlanConfig = ADMIN_CONFIG[userSubscription] || ADMIN_CONFIG['Basic'];
-
-                    adsRemaining = data.adsRemaining !== undefined ? data.adsRemaining : currentPlanConfig.limit;
-                    
-                    if (adsRemaining > currentPlanConfig.limit) {
-                        adsRemaining = currentPlanConfig.limit;
-                    }
-
-                    totalLifetimeEarned = data.lifetimeEarned || 0.00;
-                    totalWithdrawn = data.totalWithdrawn || 0.00;
-                    totalReferralEarned = data.referralEarned || 0.00;
-                    joinDate = data.joinDate || new Date().toISOString().split('T')[0];
-
-                } else {
-                    // Create new user entry with necessary fields for leaderboard and profile
-                    const initialPlan = ADMIN_CONFIG['Basic'];
-                    await db.collection('users').doc(String(telegramUserId)).set({
-                        telegramId: telegramUserId,
-                        firstName: telegramUserFirstName, 
-                        lastName: telegramUserLastName, 
-                        plan: 'Basic',
-                        balance: 0.00,
-                        adsRemaining: initialPlan.limit,
-                        joinDate: new Date().toISOString().split('T')[0],
-                        lifetimeEarned: 0.00, 
-                        totalWithdrawn: 0.00,
-                        referralEarned: 0.00,
-                        lastDailyClaim: null 
-                    });
-                    adsRemaining = initialPlan.limit; 
-                }
-                
-                updateUI(userSubscription);
-                
-            } catch (error) {
-                console.error("Error loading data from Firebase:", error);
-                WebApp.showAlert("Failed to load user data. Please try reopening the app.");
-            } finally {
-                WebApp.MainButton.hideProgress();
-                WebApp.hideMainButton();
-            }
-        }
-        
-        async function saveUserData(updates) {
-            if (!telegramUserId) return;
-            try {
-                // Use Set with { merge: true } to save updates without overwriting other fields
-                await db.collection('users').doc(String(telegramUserId)).set(updates, { merge: true });
-                console.log("User data updated in Firebase.");
-            } catch (error) {
-                console.error("Error saving data to Firebase:", error);
-                WebApp.showAlert("Error saving data. Please check your connection.");
-            }
-        }
-
-        // ----------------------------------------------------
-        // 🏆 LEADERBOARD FUNCTIONALITY
-        // ----------------------------------------------------
-
-        async function loadLeaderboardData() {
-            const leaderboardBody = document.getElementById('leaderboard-body');
-            leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading Top Earners...</td></tr>';
-
-            try {
-                // Query Firestore for top 50 users sorted by lifetimeEarned descending
-                const snapshot = await db.collection('users')
-                    .orderBy('lifetimeEarned', 'desc')
-                    .limit(50)
-                    .get();
-
-                const topUsers = [];
-                let myRank = 'N/A';
-                let rank = 1;
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const isCurrentUser = String(data.telegramId) === String(telegramUserId);
-                    
-                    const user = {
-                        rank: rank++,
-                        name: isCurrentUser ? `${data.firstName} ${data.lastName || ''} (You)` : `${data.firstName} ${data.lastName || ''}`,
-                        plan: data.plan || 'Basic',
-                        earned: data.lifetimeEarned || 0.00,
-                        isCurrentUser: isCurrentUser,
-                    };
-                    
-                    topUsers.push(user);
-                    
-                    if (isCurrentUser) {
-                        myRank = user.rank;
-                    }
-                });
-
-                document.getElementById('my-rank').innerText = myRank;
-                document.getElementById('my-lifetime-earned').innerText = totalLifetimeEarned.toFixed(2);
-
-                // Render the table
-                leaderboardBody.innerHTML = ''; 
-                topUsers.forEach((user) => {
-                    const row = leaderboardBody.insertRow();
-                    row.className = user.isCurrentUser ? 'current-user-row' : '';
-                    row.classList.add(`rank-${user.rank}`); 
-                    
-                    const rankCell = row.insertCell();
-                    rankCell.className = 'rank-cell';
-                    if (user.rank <= 3) {
-                         rankCell.innerHTML = `<span class="rank-icon">${user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉'}</span> ${user.rank}`;
-                    } else {
-                        rankCell.innerText = user.rank;
-                    }
-
-                    const nameCell = row.insertCell();
-                    nameCell.className = 'name-cell';
-                    nameCell.innerText = user.name;
-                    
-                    const planCell = row.insertCell();
-                    planCell.className = 'plan-cell';
-                    planCell.innerText = user.plan;
-
-                    const earnedCell = row.insertCell();
-                    earnedCell.style.textAlign = 'right';
-                    earnedCell.style.fontWeight = '700';
-                    earnedCell.innerText = `$${user.earned.toFixed(2)}`;
-                });
-                
-                if (topUsers.length === 0) {
-                     leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users found. Start earning!</td></tr>';
-                }
-
-            } catch (error) {
-                console.error("Error loading leaderboard data:", error);
-                leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--primary-red);">Failed to load leaderboard.</td></tr>';
-            }
-        }
-
-
-        // ----------------------------------------------------
-        // 🟢 EARNING ACTIONS
-        // ----------------------------------------------------
-
-        async function claimDailyBonus() {
-             const reward = ADMIN_CONFIG.DAILY_BONUS_REWARD;
-             
-             // Check if already claimed today (Simplified check, needs proper date logic in a real app)
-             // For simplicity, we just check if it's disabled. In a real app, use Firebase lastDailyClaim.
-             if (document.getElementById('daily-bonus-btn').disabled) {
-                 WebApp.showAlert('You have already claimed your daily bonus.');
-                 return;
-             }
-             
-             currentBalance = parseFloat(currentBalance) + reward; 
-             totalLifetimeEarned = parseFloat(totalLifetimeEarned) + reward; 
-             
-             await saveUserData({ 
-                balance: currentBalance, 
-                lifetimeEarned: totalLifetimeEarned,
-                // lastDailyClaim: new Date().toISOString().split('T')[0] // Implement proper date tracking for real app
-             });
-             
-             WebApp.showAlert(`Daily Bonus claimed successfully! $${reward.toFixed(2)} added.`);
-             document.getElementById('daily-bonus-btn').disabled = true; // Disable until next day reload (simplified)
-             updateUI(userSubscription);
-        }
-        
-        function startAdTask() {
-            if (adsRemaining <= 0) {
-                WebApp.showAlert('🚨 Today\'s ad limit reached! Upgrade your plan for more ads.');
-                return;
-            }
-            
-            const startBtn = document.getElementById('start-ad-btn');
-            startBtn.disabled = true;
-            startBtn.innerText = 'Loading Ad...';
-            
-            if (typeof window.Monetag === 'undefined' || !window.Monetag.isInitialized) {
-                WebApp.showAlert('Monetag SDK not fully loaded. Please wait a moment and try again.');
-                resetAdUI();
-                return;
-            }
-
-            WebApp.showAlert('Attempting to load high-yield ad...');
-
-            window.Monetag.showRewardedAd({
-                zoneId: MONETAG_ZONE_ID, 
-                userId: String(telegramUserId), 
-                
-                onCompleted: function() {
-                    WebApp.showAlert('Ad showed successfully. Claiming reward...');
-                    handleAdReward(); 
-                },
-                onSkipped: function() {
-                    WebApp.showAlert('🚫 Ad skipped or closed prematurely. No reward given.');
-                    resetAdUI();
-                },
-                onError: function(error) {
-                    WebApp.showAlert('⚠️ Ad Error: Could not load ad. Try again later.');
-                    console.error("Monetag Error:", error);
-                    resetAdUI();
-                }
-            });
-        }
-
-        async function handleAdReward() {
-            const earningPerAd = ADMIN_CONFIG[userSubscription].earning;
-            
-            currentBalance = parseFloat(currentBalance) + earningPerAd;
-            adsRemaining -= 1;
-            totalLifetimeEarned = parseFloat(totalLifetimeEarned) + earningPerAd; 
-
-            await saveUserData({ 
-                balance: currentBalance, 
-                adsRemaining: adsRemaining, 
-                lifetimeEarned: totalLifetimeEarned 
-            });
-
-            WebApp.showAlert(`💰 Success! $${earningPerAd.toFixed(3)} added to your balance.`);
-            resetAdUI();
-        }
-
-        function resetAdUI() {
-            const startBtn = document.getElementById('start-ad-btn');
-            
-            document.getElementById('ad-limit').innerText = adsRemaining; 
-            startBtn.disabled = false;
-            startBtn.innerText = 'Start Ad';
-            WebApp.closePopup();
-            updateUI(userSubscription);
-        }
-        
-        async function startYoutubeTask() {
-             WebApp.openLink('https://www.youtube.com/watch?v=dQw4w9WgXcQ'); 
-
-             WebApp.showPopup({
-                title: 'Video Watched?',
-                message: 'Did you watch the entire video and complete the required action? (This is a simplified check)',
-                buttons: [
-                    {id: 'yes', type: 'default', text: 'Yes, I completed it'},
-                    {id: 'no', type: 'cancel', text: 'Not yet'}
-                ]
-            }, async (buttonId) => {
-                if (buttonId === 'yes') {
-                    const reward = ADMIN_CONFIG.YOUTUBE_REWARD;
-                    currentBalance = parseFloat(currentBalance) + reward;
-                    totalLifetimeEarned = parseFloat(totalLifetimeEarned) + reward;
-                    await saveUserData({ balance: currentBalance, lifetimeEarned: totalLifetimeEarned });
-                    WebApp.showAlert(`📺 Task complete! $${reward.toFixed(2)} added.`);
-                    updateUI(userSubscription);
-                }
-            });
-        }
-
-        // ----------------------------------------------------
-        // 🟢 UI / NAVIGATION LOGIC
-        // ----------------------------------------------------
-
-        function updateUI(status) {
-            const config = ADMIN_CONFIG[status] || ADMIN_CONFIG['Basic'];
-            
-            // --- Global Config Update (UI) ---
-            document.getElementById('daily-bonus-btn').innerText = `Claim $${ADMIN_CONFIG.DAILY_BONUS_REWARD.toFixed(2)}`;
-            document.getElementById('youtube-reward-text').innerText = `$${ADMIN_CONFIG.YOUTUBE_REWARD.toFixed(2)}`;
-            document.getElementById('min-withdraw-amount').innerText = ADMIN_CONFIG.MIN_WITHDRAWAL.toFixed(2);
-            document.getElementById('withdraw-amount').min = ADMIN_CONFIG.MIN_WITHDRAWAL.toFixed(2);
-            document.getElementById('referral-rate').innerText = ADMIN_CONFIG.REFERRAL_RATE;
-            document.getElementById('support-link').href = ADMIN_CONFIG.SUPPORT_TELEGRAM_LINK; 
-            document.getElementById('official-channel-name').innerText = `@${BOT_USERNAME}`; 
-            
-            // --- Balance and Statistics Update ---
-            document.getElementById('current-balance').innerText = `$${currentBalance.toFixed(2)}`;
-            document.getElementById('withdraw-balance').innerText = currentBalance.toFixed(2);
-            document.getElementById('profile-current-balance').innerText = `$${currentBalance.toFixed(2)}`;
-            document.getElementById('profile-lifetime-earned').innerText = `$${totalLifetimeEarned.toFixed(2)}`;
-            document.getElementById('profile-total-withdrawn').innerText = `$${totalWithdrawn.toFixed(2)}`;
-            document.getElementById('profile-referral-earned').innerText = `$${totalReferralEarned.toFixed(2)}`;
-            document.getElementById('ref-earnings').innerText = `$${totalReferralEarned.toFixed(2)}`;
-            document.getElementById('profile-join-date').innerText = joinDate;
-
-            // --- Plan Status Update ---
-            document.getElementById('premium-status').innerText = status;
-            
-            // --- Task Section Update ---
-            document.getElementById('ad-limit').innerText = adsRemaining;
-            document.getElementById('earning-per-ad').innerText = config.earning.toFixed(3);
-            document.getElementById('ad-task-title').innerText = `${status} Ad Task (Limit: ${config.limit})`;
-            
-            // --- Premium Section Update (Data & Highlight) ---
-            document.querySelectorAll('.package-card').forEach(card => card.classList.remove('active-package-card', 'selected'));
-            document.getElementById('package-' + status.toLowerCase().replace(' ', '-')).classList.add('active-package-card');
-            
-            const teaser = document.getElementById('premium-ad-teaser');
-            if (status === 'Basic') {
-                teaser.style.display = 'flex';
-                document.getElementById('low-earning-warning').style.display = 'block';
-            } else {
-                teaser.style.display = 'none';
-                document.getElementById('low-earning-warning').style.display = 'none';
-            }
-
-            document.getElementById('basic-limit').innerText = ADMIN_CONFIG['Basic'].limit;
-            document.getElementById('basic-rate').innerText = ADMIN_CONFIG['Basic'].rate;
-            document.getElementById('standard-limit').innerText = ADMIN_CONFIG['Standard Pro'].limit;
-            document.getElementById('standard-rate').innerText = ADMIN_CONFIG['Standard Pro'].rate;
-            document.getElementById('vip-limit').innerText = ADMIN_CONFIG['VIP Ultimate'].limit;
-            document.getElementById('vip-rate').innerText = ADMIN_CONFIG['VIP Ultimate'].rate;
-        }
-
-        function showSection(sectionId, element) {
-            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
-            document.getElementById(sectionId + '-section').style.display = 'block';
-            document.querySelectorAll('.nav-buttons button').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            
-            if (sectionId === 'premium') renderPaymentMethods();
-            if (sectionId === 'leaderboard') loadLeaderboardData(); 
-        }
-
-        function selectPackage(packageName, price) {
-            selectedPackage = packageName;
-            document.querySelectorAll('.package-card').forEach(card => card.classList.remove('selected'));
-            document.getElementById('package-' + packageName.toLowerCase().replace(' ', '-')).classList.add('selected');
-            
-            document.getElementById('final-purchase-btn').style.display = 'block';
-            document.getElementById('final-purchase-btn').innerText = `Confirm Purchase (${packageName} for $${price.toFixed(2)})`;
-        }
-
-        function confirmPurchase() {
-            if (!selectedPackage || !selectedMethod) {
-                WebApp.showAlert('Please select both a **Package** and a **Payment Method**.');
-                return;
-            }
-            
-            const price = ADMIN_CONFIG[selectedPackage].price;
-            
-            WebApp.showPopup({
-                title: 'Confirm Purchase',
-                message: `You are about to purchase the **${selectedPackage}** plan for **$${price.toFixed(2)}** using **${selectedMethod}**. Do you wish to proceed?`,
-                buttons: [
-                    {id: 'yes', type: 'default', text: 'Yes, Proceed'},
-                    {id: 'no', type: 'cancel', text: 'Cancel'}
-                ]
-            }, (buttonId) => {
-                if (buttonId === 'yes') {
-                    const transactionData = {
-                        userId: telegramUserId,
-                        package: selectedPackage,
-                        amount: price,
-                        method: selectedMethod,
-                        timestamp: new Date().toISOString(),
-                        status: 'Pending'
-                    };
-                    
-                    db.collection('transactions').add(transactionData)
-                        .then(() => {
-                            WebApp.showAlert(`✅ Purchase initiated! Please complete your payment and send the Transaction ID to support for activation.`);
-                        })
-                        .catch(error => {
-                            WebApp.showAlert('Error creating transaction: ' + error.message);
-                        });
-                }
-            });
-        }
-        
-        function renderPaymentMethods() {
-            const list = document.getElementById('payment-methods-list');
-            list.innerHTML = ''; 
-            
-            ADMIN_PAYMENT_METHODS.forEach(method => {
-                const card = document.createElement('div');
-                card.className = 'payment-method-card';
-                card.onclick = () => selectPaymentMethod(method.name);
-                card.innerHTML = `
-                    <div class="method-details">
-                        <span class="method-icon">${method.icon}</span>
-                        <div class="method-info">
-                            <span>${method.name}</span>
-                            <small>${method.details}</small>
+            <div class="row mb-5">
+                <div class="col-md-5 mb-3">
+                    <div class="card card-balance p-3 bg-white">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto mr-3">
+                                <i class="fas fa-piggy-bank fa-3x text-success"></i>
+                            </div>
+                            <div class="col">
+                                <div class="text-success font-weight-bold text-uppercase mb-1">Current Balance</div>
+                                <div class="earning-value text-dark" id="current_balance_value">$ 0.00</div>
+                            </div>
                         </div>
                     </div>
-                    <button class="btn-select-method" data-method="${method.name}">Select</button>
-                `;
-                list.appendChild(card);
-            });
-        }
-        
-        function selectPaymentMethod(methodName) {
-            selectedMethod = methodName;
-            document.querySelectorAll('.payment-method-card').forEach(card => card.classList.remove('selected'));
-            document.querySelectorAll(`[data-method="${methodName}"]`).forEach(btn => {
-                btn.closest('.payment-method-card').classList.add('selected');
-            });
-            WebApp.showAlert(`Payment method selected: ${methodName}`);
-        }
-        
-        document.getElementById('withdrawal-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            const network = document.getElementById('withdraw-network').value;
-            const address = document.getElementById('wallet-address').value;
-            const minWithdrawal = ADMIN_CONFIG.MIN_WITHDRAWAL;
-            
-            if (amount < minWithdrawal) {
-                WebApp.showAlert(`Withdrawal amount must be at least $${minWithdrawal.toFixed(2)}.`);
-                return;
-            }
-            if (amount > currentBalance) {
-                WebApp.showAlert('Insufficient balance for withdrawal.');
-                return;
-            }
-            
-            WebApp.showPopup({
-                title: 'Confirm Withdrawal',
-                message: `Withdraw $${amount.toFixed(2)} USDT to ${network} network. Confirm wallet address: ${address}?`,
-                buttons: [
-                    {id: 'confirm', type: 'default', text: 'Confirm'},
-                    {id: 'cancel', type: 'cancel', text: 'Cancel'}
-                ]
-            }, async (buttonId) => {
-                if (buttonId === 'confirm') {
-                    currentBalance -= amount;
-                    
-                    const withdrawalData = {
-                        userId: telegramUserId,
-                        amount: amount,
-                        network: network,
-                        address: address,
-                        timestamp: new Date().toISOString(),
-                        status: 'Requested',
-                    };
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card card-earning p-3 bg-light">
+                        <i class="fas fa-eye text-primary mb-1"></i>
+                        <div class="text-muted small">Today's Ad Views</div>
+                        <h2 class="text-primary" id="ads_viewed_today_value">0 Ads</h2>
+                    </div>
+                </div>
+            </div>
 
-                    await db.collection('withdrawal_requests').add(withdrawalData);
-                    await saveUserData({ balance: currentBalance }); 
-                    
-                    WebApp.showAlert('✅ Withdrawal request submitted! It will be processed within 24-48 hours.');
-                    updateUI(userSubscription);
-                    document.getElementById('withdrawal-form').reset();
+            <hr>
+
+            <h3 class="mb-3">📺 <i class="fas fa-bullhorn"></i> View Today's Ad</h3>
+            <div class="ad-box mb-5">
+                <p class="lead text-dark">Click the button below to view the Rewarded Ad.</p>
+                
+                <div class="bg-white border rounded p-4 mb-3 w-75" style="min-height: 150px;">
+                    </div>
+                
+                <button id="view_ad_btn" class="btn btn-success btn-lg" onclick="showRewardedAd()">
+                    <i class="fas fa-play-circle"></i> View Rewarded Ad (Earn $0.01)
+                </button>
+                <div id="ad_message" class="mt-3 text-success font-weight-bold" style="display:none;"></div>
+            </div>
+
+            <hr>
+
+            <h3 class="mt-5 mb-3 border-bottom pb-2"><i class="fas fa-money-check-alt"></i> Payout</h3>
+            <div class="card p-4 mb-5">
+                 <p class="text-danger font-weight-bold">Minimum Withdrawal Limit: $ <span id="min_withdraw_limit">50.00</span></p>
+                <button class="btn btn-lg btn-danger disabled" id="withdraw_button" disabled onclick="requestWithdrawal()">Request Withdrawal</button>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // ====================================================================
+    // 🔔 Firebase কনফিগারেশন এবং ইনিশিয়ালাইজেশন (আপনার ডেটা)
+    // ====================================================================
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTbvsww7lrnRPB3hzWD1foDQ6jUPhgfAE",
+      authDomain: "easyearningsads.firebaseapp.com",
+      databaseURL: "https://easyearningsads-default-rtdb.firebaseio.com",
+      projectId: "easyearningsads",
+      storageBucket: "easyearningsads.firebasestorage.app",
+      messagingSenderId: "106083149623",
+      appId: "1:106083149623:web:4d058e482126264d0b1cb2",
+      measurementId: "G-YEHPMTSG02"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const functions = firebase.functions();
+    
+    let currentUserID = null;
+    const MONETAG_SDK_FUNC = window['show_10117888']; 
+
+    // ====================================================================
+    // 🔔 অথেন্টিকেশন ফ্লো এবং ইউজার ডেটা লোড
+    // ====================================================================
+
+    function showScreen(screenId) {
+        document.getElementById('loading_screen').style.display = 'none';
+        document.getElementById('login_page').style.display = 'none';
+        document.getElementById('main_dashboard').style.display = 'none';
+        document.getElementById(screenId).style.display = 'flex'; // Use flex for centering login/loading
+        if (screenId === 'main_dashboard') {
+            document.getElementById(screenId).style.display = 'block'; // Use block for main content layout
+        }
+    }
+
+    // A) প্রাথমিক চেক (URL এ টোকেন আছে কিনা)
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (token) {
+        // A.1) যদি টোকেন থাকে (login_handler.php থেকে এসেছে)
+        showScreen('loading_screen');
+        auth.signInWithCustomToken(token)
+            .then(() => {
+                // টোকেন ব্যবহার সফল হলে URL থেকে টোকেন সরিয়ে দিন
+                window.history.replaceState(null, null, window.location.pathname);
+            })
+            .catch((error) => {
+                console.error("Custom Token Login Failed:", error);
+                alert("Login failed! Invalid token or server error.");
+                showScreen('login_page');
+            });
+    } else {
+        // A.2) টোকেন না থাকলে Firebase স্ট্যাটাস চেক করুন
+        showScreen('loading_screen');
+    }
+
+    // B) Firebase Auth স্টেট চেকার
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUserID = user.uid;
+            loadUserData(currentUserID);
+            showScreen('main_dashboard');
+        } else if (!token) {
+            // টোকেন নেই এবং লগইনও করা নেই
+            showScreen('login_page');
+        }
+    });
+
+    function loadUserData(userId) {
+        const userRef = database.ref('users/' + userId);
+
+        userRef.on('value', (snapshot) => {
+            const userData = snapshot.val();
+            
+            if (userData) {
+                document.getElementById('user_display_name').textContent = userData.username || 'User';
+                document.getElementById('current_balance_value').textContent = `$ ${userData.current_balance ? userData.current_balance.toFixed(2) : '0.00'}`;
+                document.getElementById('ads_viewed_today_value').textContent = `${userData.ads_viewed_today || 0} Ads`;
+                
+                const minWithdraw = 50.00;
+                const withdrawButton = document.getElementById('withdraw_button');
+                if (userData.current_balance >= minWithdraw) {
+                    withdrawButton.textContent = "Request Withdrawal";
+                    withdrawButton.disabled = false;
+                    withdrawButton.classList.remove('btn-danger', 'disabled');
+                    withdrawButton.classList.add('btn-success');
+                } else {
+                    withdrawButton.textContent = `Request Withdrawal (Insufficient Balance - Need $${minWithdraw.toFixed(2)})`;
+                    withdrawButton.disabled = true;
+                    withdrawButton.classList.remove('btn-success');
+                    withdrawButton.classList.add('btn-danger', 'disabled');
                 }
-            });
+            }
         });
+    }
 
-        function copyReferralLink() {
-            const link = document.getElementById('referral-link').innerText;
-            navigator.clipboard.writeText(link).then(() => {
-                WebApp.showAlert('🔗 Referral Link copied to clipboard!');
-            }, (err) => {
-                WebApp.showAlert('Failed to copy link: ' + err);
-            });
+    function logoutUser() {
+        auth.signOut().then(() => {
+            window.location.reload(); // পেজ রিলোড করে লগইন পেজে নিয়ে যাবে
+        }).catch((error) => {
+            console.error("Logout Failed:", error);
+            alert("Logout failed.");
+        });
+    }
+
+    // ====================================================================
+    // 💰 Monetag অ্যাড এবং আর্নিং লজিক
+    // ====================================================================
+    
+    function showRewardedAd() {
+        if (!currentUserID || !MONETAG_SDK_FUNC) {
+            alert("Error: System not ready or user not logged in.");
+            return;
         }
 
+        const adMessage = document.getElementById('ad_message');
+        const adButton = document.getElementById('view_ad_btn');
+        
+        adMessage.style.display = 'none';
+        adButton.disabled = true;
+        adButton.textContent = "Ad is loading...";
 
-        // ----------------------------------------------------
-        // 🟢 INITIAL SETUP
-        // ----------------------------------------------------
-        
-        (function initialSetup() {
-            if (WebApp.initDataUnsafe && WebApp.initDataUnsafe.user) {
-                const user = WebApp.initDataUnsafe.user;
-                telegramUserId = user.id; 
-                
-                telegramUserFirstName = user.first_name || 'User'; 
-                telegramUserLastName = user.last_name || ""; 
-                
-                const fullName = telegramUserFirstName + (telegramUserLastName ? ' ' + telegramUserLastName : '');
-                const username = user.username ? `@${user.username}` : 'N/A';
-                
-                document.getElementById('profile-full-name').innerText = fullName;
-                document.getElementById('profile-tg-username').innerText = username;
-                document.getElementById('profile-tg-id').innerText = user.id;
-                
-                document.getElementById('referral-link').innerText = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+        MONETAG_SDK_FUNC({
+            type: 'end',
+            ymid: currentUserID, 
+            requestVar: 'ad_view_earn_button' 
+        })
+        .then((result) => {
+            if (result.reward_event_type === 'valued' || result.reward_event_type === 'viewed') {
+                // *** সার্ভারে টাকা যোগ করার ফাংশন কল (Cloud Function) ***
+                callAddEarningFunction(0.01, 'ad_view_reward');
+
+                adMessage.textContent = `Success! Rewarded Ad viewed. Balance update pending.`;
+                adMessage.classList.remove('text-danger');
+                adMessage.classList.add('text-success');
             } else {
-                 // Fallback for testing outside TWA (Change these for live bot testing)
-                 telegramUserId = 12345678; 
-                 telegramUserFirstName = 'Test';
-                 telegramUserLastName = 'User';
-                 document.getElementById('profile-full-name').innerText = 'Test User';
-                 document.getElementById('profile-tg-username').innerText = '@testuser';
-                 document.getElementById('profile-tg-id').innerText = telegramUserId;
-                 document.getElementById('referral-link').innerText = `https://t.me/${BOT_USERNAME}?start=12345678`;
+                adMessage.textContent = "Ad closed or failed. No reward granted.";
+                adMessage.classList.remove('text-success');
+                adMessage.classList.add('text-danger');
             }
-            
-            loadUserData(); 
-            showSection('tasks', document.getElementById('nav-tasks'));
-        })();
+            adMessage.style.display = 'block';
+            adButton.textContent = "View Next Ad";
+            adButton.disabled = false;
+        })
+        .catch((error) => {
+            console.error("Monetag Ad Error:", error);
+            adMessage.textContent = "Error: Ad failed to load. Try again later.";
+            adMessage.classList.remove('text-success');
+            adMessage.classList.add('text-danger');
+            adMessage.style.display = 'block';
+            adButton.textContent = "Try Viewing Ad Again";
+            adButton.disabled = false;
+        });
+    }
+    
+    function callAddEarningFunction(amount, source) {
+        const addEarning = functions.httpsCallable('addEarning'); 
+
+        addEarning({ amount: amount, source: source })
+            .then((result) => {
+                console.log("Earning Function Result:", result.data);
+                if (!result.data.success) {
+                    // যদি Cloud Function থেকে কোনো error আসে (যেমন: দৈনিক সীমা)
+                    alert(result.data.message || "An unknown error occurred on the server."); 
+                }
+            })
+            .catch((error) => {
+                console.error("Error calling Cloud Function:", error);
+                alert("Security Error: Check Cloud Functions deployment.");
+            });
+    }
+
+    function requestWithdrawal() {
+        const confirmRequest = confirm("Confirm withdrawal request? Your balance will be reviewed by admin.");
         
-    </script>
+        if (confirmRequest) {
+            // এখানে Cloud Function কল করে উত্তোলনের অনুরোধ পাঠানোর লজিক বসবে
+            alert("Withdrawal request sent! Admin will review.");
+        }
+    }
+</script>
+
 </body>
 </html>
-
-
-
