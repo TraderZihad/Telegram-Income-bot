@@ -3,177 +3,664 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Quality Earning Dashboard</title>
+    <title>Global Crypto Earning Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> 
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> 
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-            
     <script src='//libtl.com/sdk.js' data-zone='10117888' data-sdk='show_10117888'></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
     <style>
-        /* --- CSS STYLES --- */
-        body { font-family: 'Poppins', sans-serif; text-align: center; padding: 0; background-color: #f7f9fc; color: #1f2937; margin: 0; }
-        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 0 0 20px 0; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border-radius: 15px; overflow: hidden; }
-        .header-card { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 30px 20px; text-align: left; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 6px 15px rgba(29, 78, 216, 0.3); }
-        .header-card p { margin: 0 0 5px 0; font-weight: 500; opacity: 0.9; font-size: 14px; }
-        .header-card .amount { font-size: 44px; font-weight: 700; }
-        .header-card .user-info { font-size: 14px; margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 10px; }
-        .tab-menu { display: flex; justify-content: space-around; margin: 20px 0 30px 0; background-color: white; border-bottom: 1px solid #e5e7eb; padding: 0 10px; flex-wrap: wrap; }
-        .tab-menu button { background: none; border: none; padding: 15px 8px; cursor: pointer; font-size: 13px; transition: all 0.3s; color: #6b7280; font-weight: 600; display: flex; align-items: center; gap: 5px; flex-grow: 1; justify-content: center;}
-        .tab-menu button.active { color: #1d4ed8; border-bottom: 3px solid #1d4ed8; }
-        .tab-menu button i { font-size: 16px; }
-        .tab-content { padding: 0 20px; text-align: left; }
-        h2 { font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 20px; border-left: 4px solid #1d4ed8; padding-left: 10px; }
-        .task-card { background-color: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; }
-        .task-info h4 { margin: 0 0 5px 0; font-size: 16px; color: #1f2937; font-weight: 600; }
-        .task-info p { margin: 0; font-size: 13px; color: #6b7280; }
-        .task-reward { font-size: 18px; font-weight: 700; color: #10b981; }
-        .task-btn { background-color: #f59e0b; color: white; padding: 8px 15px; border-radius: 5px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; }
-        .btn-action { 
-            background-color: #10b981; color: white; padding: 14px 25px; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600; transition: background-color 0.3s; width: 100%; box-sizing: border-box; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 16px;
+        /* Telegram Theme Variables and Global Reset */
+        :root {
+            --tg-theme-bg-color: #f8f8fc;
+            --tg-theme-text-color: #333333;
+            --tg-theme-link-color: #5d5edd;
+            --tg-theme-secondary-bg-color: #eef1f6;
+            --tg-theme-button-color: #5d5edd;
+            --tg-theme-button-text-color: #ffffff;
+            --primary-green: #27ae60;
+            --primary-red: #e74c3c;
+            --text-light: #7f8c8d;
+            --premium-gold: #f39c12;
+            --active-green: #2ecc71;
         }
-        .btn-action:hover { background-color: #059669; }
-        input[type="number"], input[type="text"], select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-size: 15px; background-color: #f9fafb; }
-        #ad-card { border: 2px solid #3b82f6; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
-        #ad-card h3 { color: #1d4ed8; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;}
-        #ad-progress-container { background-color: #e5e7eb; border-radius: 50px; height: 15px; margin: 15px 0; overflow: hidden;}
-        #ad-progress-bar { height: 100%; width: 0%; background-color: #10b981; border-radius: 50px; transition: width 0.5s ease-in-out;}
-        #collect-btn { background-color: #f97316 !important; animation: pulse-orange 1.5s infinite; margin-top: 15px !important;}
-        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
-        .completed { background-color: #d1fae5; color: #065f46; cursor: default !important; }
-        .completed:hover { background-color: #d1fae5 !important; }
-        .task-card a { text-decoration: none; }
-        .progress-text { text-align: center; font-weight: 600; font-size: 15px; color: #4b5563; margin-top: 10px; }
+
+        body {
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            padding: 0;
+            background-color: var(--tg-theme-bg-color); 
+            color: var(--tg-theme-text-color);
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            padding: 10px 15px;
+        }
+        .header {
+            padding: 18px 10px; 
+            text-align: center;
+            font-size: 20px; 
+            font-weight: 700; 
+            color: var(--tg-theme-text-color); 
+            margin-bottom: 15px; 
+        }
+        .balance-box {
+            background: linear-gradient(135deg, var(--tg-theme-secondary-bg-color) 0%, #ffffff 100%);
+            padding: 28px 20px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            text-align: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); 
+            border: 1px solid #e5e8ef;
+        }
+        .balance-box h3 {
+            margin: 0 0 8px 0; 
+            color: var(--text-light);
+            font-size: 15px;
+            text-transform: uppercase; 
+            letter-spacing: 0.8px;
+        }
+        .balance-amount {
+            font-size: 40px; 
+            font-weight: 800; 
+            color: var(--primary-green); 
+            letter-spacing: 1.5px;
+        }
+
+        /* Navigation Buttons (Tabs) */
+        .nav-buttons {
+            display: flex; 
+            justify-content: space-around; 
+            margin-bottom: 25px; 
+            padding: 0 5px;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: auto; 
+        }
+        .nav-buttons button {
+            flex-shrink: 0; 
+            background: none;
+            color: var(--text-light);
+            border: none;
+            padding: 14px 5px; 
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: color 0.2s, border-bottom 0.2s, background-color 0.2s;
+            border-radius: 8px; 
+            white-space: nowrap;
+            margin: 0 2px;
+        }
+        .nav-buttons button.active {
+            color: var(--tg-theme-link-color);
+            background-color: var(--tg-theme-bg-color); 
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Card and Utility Styling */
+        .task-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 18px; 
+            border-radius: 12px; 
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06); 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .package-card {
+            background-color: var(--tg-theme-bg-color);
+            border: 2px solid var(--premium-gold);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);
+            position: relative;
+        }
+        .active-package-card {
+            border: 3px solid var(--active-green); 
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4); 
+        }
+        .active-package-card::before {
+            content: "YOUR ACTIVE PLAN ✔️";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--active-green);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .active-package-card h4 {
+             color: var(--active-green);
+        }
+        .package-card h4 {
+            color: var(--premium-gold);
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .package-card .price {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 15px;
+        }
+        .package-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            text-align: left;
+        }
+        .package-card ul li {
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color);
+        }
+        .package-card ul li::before {
+            content: "✨";
+            margin-right: 8px;
+        }
+        
+        /* Button Styles */
+        .task-card button, .package-card button, .full-width-btn {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .full-width-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .btn-green {
+            background-color: var(--primary-green) !important;
+        }
+        .btn-upgrade {
+            background-color: var(--premium-gold);
+            color: var(--tg-theme-button-text-color);
+        }
+        .btn-active-plan {
+            background-color: var(--active-green) !important;
+            cursor: default !important;
+            opacity: 0.8;
+        }
+
+        /* Form and Utility Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 15px;
+        }
+        .info-box {
+            background-color: #fff3cd; 
+            color: #856404; 
+            padding: 15px;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .referral-link-box {
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin-bottom: 20px;
+        }
+        .referral-link-box code {
+            display: block;
+            background: var(--tg-theme-bg-color);
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        /* Profile Grid Styling (User Data Page) */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .profile-stat-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .profile-stat-card h5 {
+            margin: 0 0 5px 0;
+            font-size: 13px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .profile-stat-card .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color);
+        }
+        .value.green {
+            color: var(--primary-green);
+        }
+        .value.red {
+            color: var(--primary-red);
+        }
+
+        /* User Info Card */
+        .user-info-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+        }
+        .user-info-card strong {
+            font-weight: 600;
+            color: var(--tg-theme-text-color);
+        }
+        .user-info-card p {
+            margin: 8px 0;
+            font-size: 15px;
+            border-bottom: 1px dashed #e0e0e0;
+            padding-bottom: 5px;
+        }
+        .user-info-card p:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        /* Payment Method Cards */
+        .payment-method-card {
+            background-color: var(--tg-theme-bg-color); 
+            border: 2px solid var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+        .payment-method-card:hover {
+            border-color: var(--tg-theme-link-color);
+        }
+        .payment-method-card.selected {
+            border: 2px solid var(--primary-green);
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .method-details {
+            display: flex;
+            align-items: center;
+        }
+        .method-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        .method-info span {
+            display: block;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--tg-theme-text-color);
+        }
+        .method-info small {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .btn-select-method {
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 80px;
+        }
+        
+        /* 🏆 Leaderboard Table Styling 🏆 */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
+            font-size: 14px;
+        }
+        .leaderboard-table th {
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-link-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .leaderboard-table tbody tr:nth-child(odd) {
+            background-color: var(--tg-theme-bg-color);
+        }
+        .rank-icon {
+            font-size: 18px;
+        }
+        .leaderboard-table .rank-cell {
+            font-weight: 800;
+            text-align: center;
+        }
+        .leaderboard-table .name-cell {
+            font-weight: 600;
+        }
+        .leaderboard-table .plan-cell {
+            font-weight: 500;
+            font-size: 12px;
+        }
+        .leaderboard-table .current-user-row {
+            background-color: #e6e6fa !important; 
+            border: 2px solid var(--tg-theme-link-color);
+        }
     </style>
 </head>
 <body>
 
+    <div class="header">
+        Global Earning Dashboard 💎
+    </div>
+
     <div class="container">
-        <div class="header-card">
-            <p>মোট ইনকাম</p>
-            <div class="amount"><i class="fas fa-dollar-sign"></i> <span id="user-balance">0.00</span></div>
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i> ইউজার: <strong id="tg-username">@LoadingUser</strong>
-            </div>
+
+        <div class="balance-box">
+            <h3>TOTAL EARNED BALANCE (USD)</h3>
+            <p class="balance-amount" id="current-balance">$0.00</p>
         </div>
 
-        <div class="tab-menu">
-            <button class="active" onclick="showTab('earn', this)"><i class="fas fa-gift"></i> ডেইলি বোনাস</button>
-            <button onclick="showTab('tasks', this)"><i class="fas fa-tasks"></i> টাস্ক</button>
-            <button onclick="showTab('video-claim', this)"><i class="fab fa-youtube"></i> ভিডিও ক্লেইম</button>
-            <button onclick="showTab('withdraw', this)"><i class="fas fa-wallet"></i> উইথড্র</button>
-            <button onclick="showTab('refer', this)"><i class="fas fa-share-alt"></i> রেফার</button>
-            <button onclick="showTab('support', this)"><i class="fas fa-headset"></i> সাপোর্ট</button>
+        <div class="nav-buttons">
+            <button id="nav-tasks" class="active" onclick="showSection('tasks', this)">Tasks</button>
+            <button id="nav-premium" onclick="showSection('premium', this)">⭐ Premium</button>
+            <button id="nav-withdraw" onclick="showSection('withdraw', this)">Withdraw</button>
+            <button id="nav-leaderboard" onclick="showSection('leaderboard', this)">🏆 Leaderboard</button> 
+            <button id="nav-profile" onclick="showSection('profile', this)">Profile</button>
+            <button id="nav-referral" onclick="showSection('referral', this)">Referral</button>
+            <button id="nav-support" onclick="showSection('support', this)">Support</button>
         </div>
 
-        <div id="earn-tab" class="tab-content">
-            <h2><i class="fas fa-coins"></i> দৈনিক ইনকাম (অ্যাড ভিউ)</h2>
-            <div id="ad-card">
-                <h3><i class="fas fa-video"></i> আজকের অ্যাড ক্লেইম</h3>
-                <p style="color: #6b7280; font-size: 14px; text-align: center;">মোট অ্যাড ভিউ করে $ <strong style="color:#10b981;">0.50</strong> ইনকাম করুন।</p>
-                <div id="ad-progress-container">
-                    <div id="ad-progress-bar"></div>
-                </div>
-                <div class="progress-text">
-                    <span id="ad-count">0</span> / <span id="ad-limit">5</span> অ্যাড দেখা হয়েছে
-                </div>
-                <button id="collect-btn" class="btn-action" disabled>
-                    <i class="fas fa-spinner fa-spin" id="ad-loader" style="display:inline-block;"></i> লোড হচ্ছে...
-                </button>
-            </div>
-        </div>
-        
-        <div id="tasks-tab" class="tab-content" style="display:none;">
-            <h2><i class="fas fa-link"></i> ইনস্ট্যান্ট সোশ্যাল টাস্ক</h2>
+        <div class="section" id="tasks-section">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">💰 Earning Tasks</h3>
+            
             <div class="task-card">
-                <div class="task-info"> <h4>ইউটিউব সাবস্ক্রাইব করুন</h4> <p>আমাদের ইউটিউব চ্যানেলে সাবস্ক্রাইব করে ইনস্ট্যান্ট $1.00 ক্লেইম করুন।</p> </div>
-                <div class="task-reward"><i class="fas fa-dollar-sign"></i> 1.00</div>
-                <a href="https://www.youtube.com/@techblogbd" target="_blank" onclick="claimSocialReward('youtube', document.getElementById('youtube-btn')); return false;"> <button id="youtube-btn" class="task-btn">সাবস্ক্রাইব & ক্লেইম</button> </a>
-            </div>
-            <div class="task-card">
-                <div class="task-info"> <h4>টেলিগ্রাম চ্যানেলে যুক্ত হন</h4> <p>আমাদের অফিসিয়াল টেলিগ্রাম চ্যানেলে জয়েন করে ইনস্ট্যান্ট $0.50 ক্লেইম করুন।</p> </div>
-                <div class="task-reward"><i class="fas fa-dollar-sign"></i> 0.50</div>
-                <a href="https://t.me/techblogbdofficial" target="_blank" onclick="claimSocialReward('telegram', document.getElementById('telegram-btn')); return false;"> <button id="telegram-btn" class="task-btn">জয়েন & ক্লেইম</button> </a>
-            </div>
-            <h2 style="margin-top: 30px;"><i class="fas fa-fire"></i> উচ্চ আয়ের অফার</h2>
-            <div id="tasks-list">
-                <div class="task-card" style="border: 2px solid #3b82f6;">
-                    <div class="task-info"> <h4>স্মার্টলিংক ভিজিট</h4> <p>বিভিন্ন হাই-পেয়িং অফার ভিজিট করুন। (CPC ভিত্তিক ইনকাম)</p> </div>
-                    <div class="task-reward">উচ্চ CPM</div>
-                    <a href="https://otieu.com/4/10117894" target="_blank"> <button class="task-btn" style="background-color: #06b6d4;">ভিজিট করুন</button> </a>
+                <div>
+                    <h4>Daily Bonus Claim</h4>
+                    <p>Click to get your daily reward.</p>
                 </div>
+                <button class="btn-green" id="daily-bonus-btn" onclick="claimDailyBonus()"></button> 
+            </div>
+
+            <div class="task-card" id="ad-task-card">
+                <div>
+                    <h4 id="ad-task-title"></h4> 
+                    <p>Ads Left: <span id="ad-limit">0</span> | Earn: $<span id="earning-per-ad">0.000</span> per ad</p> 
+                    <p id="low-earning-warning" style="color: var(--primary-red); font-weight: 600;">(Standard Earning Rate - **Upgrade for 10X Higher CPM** ⚠️)</p>
+                </div>
+                <button id="start-ad-btn" onclick="startAdTask()">Start Ad</button>
+            </div>
+
+            <div id="monetag-ad-container" style="display:none; text-align:center; padding: 20px;">
+                <h4>Loading High CPM Ad...</h4>
+            </div>
+
+            <div class="task-card" id="premium-ad-teaser" style="border: 2px dashed var(--premium-gold); padding: 25px 18px; display: flex; align-items: center;">
+                <div>
+                    <h4 style="color: var(--premium-gold);">🚀 Unlock Premium Ad Earning</h4>
+                    <p style="color: var(--tg-theme-text-color); font-weight: 500; font-size: 15px;">Get **10X Higher Income** and up to 30 Ads/Day!</p>
+                </div>
+                <button class="btn-upgrade" onclick="showSection('premium', document.getElementById('nav-premium'))">Upgrade</button>
+            </div>
+
+
+            <div class="task-card">
+                <div>
+                    <h4>Watch YouTube Videos 📺</h4>
+                    <p>Reward: <span id="youtube-reward-text">$0.00</span> per video.</p>
+                </div>
+                <button onclick="startYoutubeTask()">Watch Video</button>
             </div>
         </div>
 
-        <div id="video-claim-tab" class="tab-content" style="display:none;">
-            <h2><i class="fab fa-youtube"></i> ভিডিও দেখুন ও ক্লেইম করুন ($<strong id="video-claim-reward">0.80</strong>)</h2>
-            <div id="video-task-card" class="task-card" style="display: block; text-align: center; border: 2px dashed #3b82f6; padding: 10px;">
-                <p style="font-weight: 600; margin-bottom: 5px;">ভিডিও টাইটেল:</p>
-                <h4 id="video-title" style="color: #1d4ed8; margin-bottom: 15px;">Load হচ্ছে...</h4>
-                <div id="youtube-player-container" style="width: 100%; aspect-ratio: 16 / 9; margin: 10px 0;"><div id="youtube-player"></div></div>
-                <p style="margin-top: 15px; color: #ef4444; font-weight: 700;" id="video-instruction">ভিডিওটি পুরোপুরি দেখা না হলে ক্লেইম বাটন চালু হবে না।</p>
-                <button id="video-claim-btn" class="btn-action" disabled style="background-color: #10b981;">
-                    <i class="fas fa-hourglass-start"></i> ভিডিওটি শেষ হওয়া পর্যন্ত অপেক্ষা করুন
-                </button>
-                <p id="claim-status" style="color: #6b7280; margin-top: 10px; font-weight: 500;">
-                    আজকের স্ট্যাটাস: <span id="video-today-status">লোড হচ্ছে...</span>
-                </p>
+        <div class="section" id="premium-section" style="display: none;">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">✨ Upgrade Your Earning Plan for High CPM!</h3>
+            <p style="font-size: 15px; color: var(--text-light); margin-bottom: 25px;">All plans provide **lifetime high-yield access**.</p>
+
+            <div class="package-card active-package-card" id="package-basic">
+                <h4>Basic (Free)</h4>
+                <p class="price">$0.00 <span style="font-size: 16px; font-weight: 500;">(Standard Low Earning)</span></p>
+                <ul>
+                    <li>✨ **Daily Ads:** <span id="basic-limit">5</span> Ads/Day (Free Limit)</li>
+                    <li>✨ **Income:** Standard Earning Rate **(<span id="basic-rate">2X</span> Base)**</li>
+                    <li>✨ **Access:** Always Active</li>
+                </ul>
+                <button class="btn-active-plan" disabled>Active Plan</button>
             </div>
+
+
+            <div class="package-card" id="package-standard-pro">
+                <h4>Standard Pro 📈</h4>
+                <p class="price">$5.00 <span style="font-size: 16px; font-weight: 500;">(One Time Fee)</span></p>
+                <ul>
+                    <li>✨ **Daily Ads:** <span id="standard-limit">15</span> Ads/Day (Maximized Limit)</li>
+                    <li>✨ **Income:** **<span id="standard-rate">5X</span> High Earning Rate!** (High CPC/CPM)</li>
+                    <li>✨ **Access:** Lifetime Validity & Priority Support</li>
+                </ul>
+                <button onclick="selectPackage('Standard Pro', 5.00)">Buy Now $5.00</button>
+            </div>
+
+            <div class="package-card" id="package-vip-ultimate">
+                <h4>VIP Ultimate 🚀</h4>
+                <p class="price">$10.00 <span style="font-size: 16px; font-weight: 500;">(One Time Fee)</span></p>
+                <ul>
+                    <li>✨ **Daily Ads:** <span id="vip-limit">30</span> Ads/Day (Maximum Available Limit)</li>
+                    <li>✨ **Income:** **<span id="vip-rate">10X</span> Extreme Earning Rate!** (Highest CPC/CPM)</li>
+                    <li>✨ **Access:** Lifetime Validity & **Fastest Payout Priority**</li>
+                </ul>
+                <button onclick="selectPackage('VIP Ultimate', 10.00)">Buy Now $10.00</button>
+            </div>
+
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 35px; font-size: 18px;">💳 Select Payment Options</h3>
+            <div id="payment-methods-list">
+                <p style="color: var(--text-light); text-align: center;">Please select a package above to view payment methods.</p>
+            </div>
+            
+            <button id="final-purchase-btn" style="display: none; width: 100%; padding: 15px; margin-top: 20px;" onclick="confirmPurchase()">Confirm Purchase (USD)</button>
+
         </div>
 
-        <div id="withdraw-tab" class="tab-content" style="display:none;">
-            <h2><i class="fas fa-money-check-alt"></i> টাকা তোলার অনুরোধ</h2>
+        <div class="section" id="withdraw-section" style="display: none;">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">💸 Crypto Withdrawal (USDT Only)</h3>
+            
+            <div class="info-box">
+                **Minimum Withdrawal:** $<span id="min-withdraw-amount">0.00</span> USDT. Fees may apply. Current Balance: $<span id="withdraw-balance">0.00</span>.
+            </div>
+
             <form id="withdrawal-form">
-                <p style="color: #ef4444; font-weight: 600;">সর্বনিম্ন উইথড্রয়াল: <strong id="min-withdraw-amount">লোড হচ্ছে...</strong></p>
-                <input type="number" id="amount" placeholder="পরিমাণ" required>
-                <select id="method" required><option value="bKash">বিকাশ</option><option value="Nagad">নগদ</option></select>
-                <input type="text" id="account" placeholder="আপনার পেমেন্ট নম্বর" required>
-                <button type="submit" class="btn-action" style="background-color: #3b82f6;">
-                    <i class="fas fa-paper-plane"></i> অনুরোধ পাঠান
-                </button>
+                <div class="form-group">
+                    <label for="withdraw-amount">Amount (USDT)</label>
+                    <input type="number" id="withdraw-amount" placeholder="Enter amount" min="5.00" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="withdraw-network">Network</label>
+                    <select id="withdraw-network" required>
+                        <option value="">Select Network</option>
+                        <option value="TRC20">USDT (TRC20) - Fast & Low Fee</option>
+                        <option value="BEP20">USDT (BEP20 / BSC) - Fast</option>
+                        <option value="ERC20">USDT (ERC20) - High Fee</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="wallet-address">Wallet Address (USDT)</label>
+                    <input type="text" id="wallet-address" placeholder="TRC20/BEP20 Address" required>
+                </div>
+                
+                <button type="submit" class="full-width-btn btn-green">Request Withdrawal</button>
             </form>
         </div>
-
-        <div id="refer-tab" class="tab-content" style="display:none;">
-            <h2><i class="fas fa-user-friends"></i> বন্ধু রেফার করুন</h2>
-            <p>আপনার রেফার লিংক কপি করে বন্ধুদের সাথে শেয়ার করুন:</p>
-            <input type="text" id="referral-link" value="https://t.me/easyearningsads_bot?start=refID" readonly>
-            <button class="btn-action" onclick="copyReferralLink()" style="background-color: #f97316;">
-                <i class="fas fa-copy"></i> লিংক কপি করুন
-            </button>
-            <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">**এক্সক্লুসিভ ইনকাম:** অতিরিক্ত বোনাসের জন্য আমাদের স্মার্ট অপশন ব্যবহার করুন।</p>
-            <button class="btn-action" onclick="window.open('https://otieu.com/4/10117894', '_blank')" style="background-color: #06b6d4;">
-                <i class="fas fa-link"></i> স্মার্ট অপশন ভিজিট করুন
-            </button>
-        </div>
         
-        <div id="support-tab" class="tab-content" style="display:none;">
-            <h2><i class="fas fa-question-circle"></i> সাপোর্ট ও যোগাযোগ</h2>
-            <div class="task-card" style="display: block; text-align: center; border: 2px solid #3b82f6;">
-                <p style="font-size: 16px; font-weight: 600; color: #1d4ed8; margin-bottom: 15px;">সরাসরি আমাদের সাথে কথা বলুন</p>
-                <p style="color: #6b7280; margin-bottom: 20px;">পেমেন্ট সংক্রান্ত সমস্যা বা অন্য কোনো জিজ্ঞাসা থাকলে নিচের বাটনে ক্লিক করুন:</p>
-                <a href="https://t.me/Your_Support_Username" target="_blank"> 
-                    <button class="btn-action" style="background-color: #0088CC;"> <i class="fab fa-telegram-plane"></i> সাপোর্ট চ্যাটে যান </button>
-                </a>
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb;">
-                    <p style="font-size: 14px; font-weight: 500; color: #1f2937; margin-bottom: 5px;">অফিসিয়াল চ্যানেল:</p>
-                    <a href="https://t.me/techblogbdofficial" target="_blank" style="color: #0088CC; text-decoration: none; font-weight: 600;"> <i class="fab fa-telegram"></i> @TechBlogBdOfficial </a>
+        <div class="section" id="leaderboard-section" style="display: none;">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">🏆 Top Earners Leaderboard</h3>
+            <p style="font-size: 14px; color: var(--text-light); margin-bottom: 20px;">Ranking based on **Lifetime Earned** (Total Earnings).</p>
+            
+            <div class="info-box" style="background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; text-align: center;">
+                **Your Rank: <span id="my-rank">N/A</span>** | **Your Lifetime Earned: $<span id="my-lifetime-earned">0.00</span>**
+            </div>
+
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">Rank</th>
+                        <th style="width: 40%;">User</th>
+                        <th style="width: 20%;">Plan</th>
+                        <th style="width: 30%; text-align: right;">Total Earned</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="4" style="text-align: center;">Loading Top Earners...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="profile-section" style="display: none;">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 20px;">👤 My Account Details</h3>
+
+            <div class="user-info-card">
+                <h4 style="margin-top: 0; color: var(--tg-theme-link-color);">User Identity (Auto Login)</h4>
+                <p>
+                    <strong>Name:</strong> <span id="profile-full-name">-- Loading --</span>
+                </p>
+                <p>
+                    <strong>Telegram Username:</strong> <span id="profile-tg-username">-- Loading --</span>
+                </p>
+                <p>
+                    <strong>Telegram User ID:</strong> <span id="profile-tg-id">-- Loading --</span>
+                </p>
+                <p>
+                    <strong>Subscription Plan:</strong> 
+                    <span id="premium-status" style="font-weight: 700;">Basic (Free)</span>
+                </p>
+                <p>
+                    <strong>Member Since:</strong> <span id="profile-join-date">Loading...</span>
+                </p>
+            </div>
+            
+            <h3 style="color: var(--tg-theme-text-color); font-size: 20px;">💰 Earning Statistics</h3>
+            
+            <div class="profile-grid">
+                
+                <div class="profile-stat-card">
+                    <h5>Current Balance</h5>
+                    <p class="value green" id="profile-current-balance">$0.00</p>
                 </div>
-                <div style="margin-top: 15px;">
-                    <p style="font-size: 14px; color: #ef4444; margin: 0;">দয়া করে বার বার মেসেজ করে বিরক্তি সৃষ্টি করবেন না। আমরা ২৪ ঘন্টার মধ্যে আপনার প্রশ্নের উত্তর দেবো।</p>
+
+                <div class="profile-stat-card">
+                    <h5>Lifetime Earnings</h5>
+                    <p class="value green" id="profile-lifetime-earned">$0.00</p>
+                </div>
+
+                <div class="profile-stat-card">
+                    <h5>Total Withdrawn</h5>
+                    <p class="value red" id="profile-total-withdrawn">$0.00</p>
+                </div>
+
+                <div class="profile-stat-card">
+                    <h5>Referral Bonus</h5>
+                    <p class="value green" id="profile-referral-earned">$0.00</p>
                 </div>
             </div>
+            
+            <h4 style="color: var(--tg-theme-text-color); font-size: 17px; margin-top: 25px;">Transaction History</h4>
+            <div class="task-card" style="display: block;">
+                <p style="text-align: center; color: var(--text-light);">No recent transactions found.</p>
+            </div>
         </div>
+        
+        <div class="section" id="referral-section" style="display: none;">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">🔗 Referral System</h3>
+            
+            <div class="info-box" style="background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;">
+                Invite users and earn **<span id="referral-rate">20%</span>** of their ad earnings for life!
+            </div>
+
+            <div class="referral-link-box">
+                <p style="margin-top: 0;">**Your Unique Referral Link:**</p>
+                <code id="referral-link">Loading Referral Link...</code>
+            </div>
+            
+            <button class="full-width-btn" onclick="copyReferralLink()">Copy Link</button>
+
+            <h4 style="color: var(--tg-theme-text-color); font-size: 17px; margin-top: 30px;">Your Statistics</h4>
+            <div class="task-card" style="display: block;">
+                <p style="margin-bottom: 12px;">**Total Referred Users:** <span id="ref-count">0</span> Users</p>
+                <p>**Total Referral Earnings:** <span id="ref-earnings" style="color: var(--primary-green); font-weight: 600;">$0.00</span></p>
+            </div>
+        </div>
+        
+        <div class="section" id="support-section" style="display: none;">
+            <h3 style="color: var(--tg-theme-text-color); margin-top: 0; font-size: 18px;">📞 Support & Helpdesk</h3>
+
+            <div class="info-box" style="background-color: #f7e0ef; color: #8e44ad; border-color: #f0e6f7;">
+                If you have any payment or account issues, please contact our official support channel.
+            </div>
+
+            <a id="support-link" href="#" target="_blank" class="full-width-btn" style="text-decoration: none; display: block; background-color: var(--tg-theme-link-color);">
+                Contact Support on Telegram
+            </a>
+            
+            <h4 style="color: var(--tg-theme-text-color); font-size: 17px; margin-top: 30px;">FAQs / Help</h4>
+             <div class="task-card" style="display: block;">
+                <p style="margin-bottom: 12px;">**Working Hours:** 10:00 AM - 10:00 PM (GMT+6)</p>
+                <p>**Official Channel:** <span id="official-channel-name">@easyearningsads_bot</span></p>
+            </div>
+        </div>
+
     </div>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <script>
-        // *** ১. FIREBASE কনফিগারেশন (আপনার দেওয়া তথ্য অনুযায়ী) ***
+        const WebApp = window.Telegram.WebApp;
+        WebApp.ready(); 
+
+        // ----------------------------------------------------
+        // 🟢 1. FIREBASE CONFIGURATION & INITIALIZATION
+        // ----------------------------------------------------
+        
+        // ✅ YOUR LIVE CONFIGURATION (User provided)
         const firebaseConfig = {
             apiKey: "AIzaSyAbugSJucb7OfrGbWqjbMEBIl6qAsg2BJ8",
             authDomain: "my-project-c3584.firebaseapp.com",
@@ -184,471 +671,566 @@
             appId: "1:876896062289:web:35ec2388f05d1c903e6170",
             measurementId: "G-Q64B59JRHR"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
 
-        // **কোর ডেটা এবং ইউজার লোডিং**
-        const tgData = window.Telegram.WebApp.initDataUnsafe;
-        const user = tgData.user || {};
-        let currentUserId = user.id ? user.id.toString() : null;
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+        // ----------------------------------------------------
         
-        // ** ২. গ্লোবাল কনফিগারেশন **
-        const BONUS_AMOUNT = 0.50; 
-        const adButton = document.getElementById('collect-btn');
-        const showMonetagAd = window.show_10117888; 
-        const TODAY = new Date().toISOString().split('T')[0];
-        let globalAdLimit = 5; 
-        let globalMinWithdrawal = 500;
-        let globalVideoTask = {
-            link: "dQw4w9WgXcQ", // আপনার YouTube Video ID
-            title: "গুরুত্বপূর্ণ আপডেট ভিডিওটি দেখুন", 
-            reward: 0.80
-        };
-        const SOCIAL_TASKS = {
-            youtube: { reward: 1.00, key: 'youtubeSubscribed', buttonId: 'youtube-btn' },
-            telegram: { reward: 0.50, key: 'telegramJoined', buttonId: 'telegram-btn' }
-        };
-
-        // --- ৩. ইউটিউব প্লেয়ার লজিক ---
-        let player;
-        let videoWatched = false;
+        // 🚨 CONFIG UPDATES FROM USER INPUT 🚨
+        const MONETAG_ZONE_ID = '10117888'; 
+        const BOT_USERNAME = 'easyearningsads_bot'; 
+        const SUPPORT_LINK = `https://t.me/${BOT_USERNAME}`; 
+        // -------------------------------------
         
-        function loadYouTubeAPI() { 
-             const tag = document.createElement('script');
-             tag.src = "https://www.youtube.com/iframe_api";
-             const firstScriptTag = document.getElementsByTagName('script')[0];
-             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
-        
-        window.onYouTubeIframeAPIReady = function() {
-             if (document.getElementById('video-claim-tab').style.display !== 'none' && !player) {
-                 createYouTubePlayer(globalVideoTask.link);
-             }
+        // --- PLATFORM CONFIG (Default values, will be loaded from Firestore) ---
+        let ADMIN_CONFIG = {
+            DAILY_BONUS_REWARD: 0.15,
+            YOUTUBE_REWARD: 0.08,
+            MIN_WITHDRAWAL: 5.00,
+            REFERRAL_RATE: '20%',
+            SUPPORT_TELEGRAM_LINK: SUPPORT_LINK, 
+            'Basic': { limit: 5, earning: 0.005, rate: '2X', price: 0.00 },
+            'Standard Pro': { limit: 15, earning: 0.025, rate: '5X', price: 5.00 },
+            'VIP Ultimate': { limit: 30, earning: 0.050, rate: '10X', price: 10.00 }
         };
         
-        function createYouTubePlayer(videoId) { 
-             // পুরনো প্লেয়ার থাকলে তা ধ্বংস করে দিন 
-             if (player) { player.destroy(); player = null; }
-             
-             // যদি ভিডিও ক্লেইম করা হয়ে যায়, তবে প্লেয়ার তৈরি করার দরকার নেই
-             if (document.getElementById('video-today-status').innerText.includes('সম্পন্ন')) return;
+        const ADMIN_PAYMENT_METHODS = [
+            { name: 'Bkash', details: 'Local Payment (BDT)', icon: '💰', type: 'fiat' },
+            { name: 'Nagad', details: 'Local Payment (BDT)', icon: '💰', type: 'fiat' },
+            { name: 'USDT (TRC20)', details: 'Tron Network', icon: '🚀', type: 'crypto' },
+            { name: 'USDT (BEP20 / BSC)', details: 'Binance Smart Chain', icon: '🟡', type: 'crypto' }
+        ];
 
-             player = new YT.Player('youtube-player', {
-                 videoId: videoId,
-                 playerVars: {
-                     'controls': 1,
-                     'autoplay': 0,
-                     'modestbranding': 1,
-                     'rel': 0,
-                     'showinfo': 0
-                 },
-                 events: {
-                     'onReady': onPlayerReady,
-                     'onStateChange': onPlayerStateChange
-                 }
-             });
-        }
+        // --- USER STATE (Will be loaded from Firestore) ---
+        let userSubscription = 'Basic'; 
+        let adsRemaining = 0; 
+        let currentBalance = 0.00; 
+        let totalLifetimeEarned = 0.00; 
+        let totalWithdrawn = 0.00;
+        let totalReferralEarned = 0.00;
+        let joinDate = "Loading..."; 
         
-        function onPlayerReady(event) {}
-        
-        function onPlayerStateChange(event) {
-            const videoClaimBtn = document.getElementById('video-claim-btn');
-            const videoInstruction = document.getElementById('video-instruction');
+        let selectedPackage = null;
+        let selectedMethod = null;
+        let telegramUserId = null;
+        let telegramUserFirstName = "User"; 
+        let telegramUserLastName = ""; 
 
-            if (event.data === YT.PlayerState.PLAYING) {
-                document.querySelectorAll('.tab-menu button').forEach(btn => btn.disabled = true);
-                document.querySelector('.tab-menu button.active').disabled = false;
-                videoClaimBtn.disabled = true;
-                videoClaimBtn.innerHTML = `<i class="fas fa-lock"></i> ভিডিওটি শেষ না হওয়া পর্যন্ত অপেক্ষা করুন`;
-                videoInstruction.style.color = '#f97316';
-                videoInstruction.innerText = 'ভিডিও চলছে! পুরোপুরি শেষ হওয়ার জন্য অপেক্ষা করুন...';
 
-            } else if (event.data === YT.PlayerState.ENDED) {
-                videoWatched = true;
-                document.querySelectorAll('.tab-menu button').forEach(btn => btn.disabled = false); 
-                videoClaimBtn.disabled = false;
-                videoClaimBtn.innerHTML = `<i class="fas fa-check-circle"></i> $${globalVideoTask.reward.toFixed(2)} ক্লেইম করুন`;
-                videoClaimBtn.style.backgroundColor = '#10b981';
-                videoInstruction.style.color = '#10b981';
-                videoInstruction.innerText = 'অভিনন্দন! ভিডিও দেখা শেষ। এবার ক্লেইম বাটনটি ক্লিক করুন।';
+        // ----------------------------------------------------
+        // 🟢 FIREBASE DATA LOADING & SAVING LOGIC
+        // ----------------------------------------------------
 
-            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
-                if (!videoWatched) {
-                    document.querySelectorAll('.tab-menu button').forEach(btn => btn.disabled = true);
-                    document.querySelector('.tab-menu button.active').disabled = false;
-                    videoInstruction.innerText = 'পজ করা হয়েছে। চালিয়ে যান...';
-                }
-            }
-        }
-        
-        // --- ৪. মূল ইউজার ডেটা লোড ফাংশন ---
-        async function loadUserData(userId) {
-            if (!userId) return;
+        async function loadUserData() {
+            if (!telegramUserId) return;
             
-            // ৪.১ গ্লোবাল সেটিংস লোড করা
             try {
-                const configDoc = await db.collection("config").doc("global").get();
+                WebApp.showMainButton();
+                WebApp.MainButton.setText('LOADING DATA...');
+                WebApp.MainButton.showProgress(true);
+
+                // 1. Load Global Config
+                const configDoc = await db.collection('settings').doc('global').get();
                 if (configDoc.exists) {
-                    const configData = configDoc.data();
-
-                    // --- 🔥 মেইন ওয়েবসাইট লিংক চেক (গুরুত্বপূর্ণ) 🔥 ---
-                    const mainWebsiteLink = configData.mainWebsiteLink;
-                    // বর্তমান URL-এর সঙ্গে Firebase-এ থাকা লিঙ্কের তুলনা করা হচ্ছে
-                    if (mainWebsiteLink && mainWebsiteLink !== window.location.href.split('?')[0]) {
-                        console.log("Redirecting to mainWebsiteLink:", mainWebsiteLink);
-                        // ইউজার ডেটা পাস করার জন্য start_param যুক্ত করা
-                        window.location.href = mainWebsiteLink + '?tgWebAppStartParam=' + (tgData.start_param || '');
-                        return; // রিডাইরেক্টের পর আর কোড এক্সিকিউট করার দরকার নেই
-                    }
-                    // --- রিডাইরেক্ট লজিক শেষ ---
+                    ADMIN_CONFIG = { ...ADMIN_CONFIG, ...configDoc.data() };
                     
-                    globalAdLimit = configData.dailyAdLimit || 5;
-                    globalMinWithdrawal = configData.minWithdrawal || 500;
-                    globalVideoTask.link = configData.videoLink || globalVideoTask.link;
-                    globalVideoTask.title = configData.videoTitle || globalVideoTask.title;
-                    globalVideoTask.reward = configData.videoReward || globalVideoTask.reward;
+                    if(ADMIN_CONFIG.BASIC_EARNING) ADMIN_CONFIG['Basic'].earning = ADMIN_CONFIG.BASIC_EARNING;
+                    if(ADMIN_CONFIG.STANDARD_EARNING) ADMIN_CONFIG['Standard Pro'].earning = ADMIN_CONFIG.STANDARD_EARNING;
+                    if(ADMIN_CONFIG.VIP_EARNING) ADMIN_CONFIG['VIP Ultimate'].earning = ADMIN_CONFIG.VIP_EARNING;
                 }
-            } catch (e) { console.error("Error loading global config:", e); }
-            
-            // UI আপডেট
-            document.getElementById('ad-limit').innerText = globalAdLimit;
-            document.getElementById('min-withdraw-amount').innerText = `${globalMinWithdrawal} টাকা`;
-            document.getElementById('video-title').innerText = globalVideoTask.title;
-            document.getElementById('video-claim-reward').innerText = globalVideoTask.reward.toFixed(2);
+                
+                // 2. Load User Specific Data
+                const userDoc = await db.collection('users').doc(String(telegramUserId)).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    userSubscription = data.plan || 'Basic';
+                    currentBalance = data.balance || 0.00;
+                    
+                    const currentPlanConfig = ADMIN_CONFIG[userSubscription] || ADMIN_CONFIG['Basic'];
 
-            // ৪.২ ইউজার ডেটা লোড করা
-            const userRef = db.collection("users").doc(userId);
-            const doc = await userRef.get();
-            let userData = { balance: 0.00, adCount: 0, lastAdDate: null, youtubeSubscribed: false, telegramJoined: false, videoClaimDate: null };
+                    adsRemaining = data.adsRemaining !== undefined ? data.adsRemaining : currentPlanConfig.limit;
+                    
+                    if (adsRemaining > currentPlanConfig.limit) {
+                        adsRemaining = currentPlanConfig.limit;
+                    }
 
-            if (doc.exists) { userData = doc.data(); } 
-            
-            // ডেইলি অ্যাড কাউন্ট রিসেট (যদি দিন বদলে যায়)
-            if (userData.lastAdDate !== TODAY) {
-                // শুধুমাত্র adCount রিসেট করলে হবে না, সাথে lastAdDate আপডেট করতে হবে
-                await userRef.update({ adCount: 0, lastAdDate: TODAY });
-                userData.adCount = 0;
-            }
+                    totalLifetimeEarned = data.lifetimeEarned || 0.00;
+                    totalWithdrawn = data.totalWithdrawn || 0.00;
+                    totalReferralEarned = data.referralEarned || 0.00;
+                    joinDate = data.joinDate || new Date().toISOString().split('T')[0];
 
-            // ৪.৩ UI আপডেট (ব্যালেন্স, অ্যাড কাউন্ট)
-            document.getElementById('user-balance').innerText = `${userData.balance ? userData.balance.toFixed(2) : '0.00'}`;
-            document.getElementById('tg-username').innerText = user.username ? `@${user.username}` : user.first_name || "ইউজার";
-            const adCount = userData.adCount || 0;
-            document.getElementById('ad-count').innerText = adCount;
-            document.getElementById('ad-progress-bar').style.width = `${(adCount / globalAdLimit) * 100}%`;
-
-            if (adCount >= globalAdLimit) {
-                adButton.disabled = true;
-                adButton.innerHTML = `<i class="fas fa-check"></i> আজকের টাস্ক সম্পন্ন`;
-                adButton.style.backgroundColor = '#10b981';
-            } else {
-                preloadMonetagAd();
-            }
-            
-            // সোশ্যাল টাস্ক বাটন স্ট্যাটাস আপডেট
-            for (const taskName in SOCIAL_TASKS) {
-                const task = SOCIAL_TASKS[taskName];
-                const button = document.getElementById(task.buttonId);
-                if (userData[task.key]) {
-                    button.disabled = true;
-                    button.innerText = 'ইতিমধ্যেই ক্লেইম করা হয়েছে';
-                    button.classList.add('completed');
                 } else {
-                    button.disabled = false;
-                    button.innerText = (taskName === 'youtube') ? 'সাবস্ক্রাইব & ক্লেইম' : 'জয়েন & ক্লেইম';
-                    button.classList.remove('completed');
-                }
-            }
-
-            // ৪.৪ ভিডিও ক্লেইম স্ট্যাটাস আপডেট
-            const videoClaimBtn = document.getElementById('video-claim-btn');
-            const videoTodayStatus = document.getElementById('video-today-status');
-            const videoInstruction = document.getElementById('video-instruction');
-            
-            if (userData.videoClaimDate === TODAY) {
-                videoTodayStatus.innerText = 'আজকের ভিডিও টাস্কটি ইতিমধ্যেই সম্পন্ন হয়েছে।';
-                videoTodayStatus.style.color = '#10b981';
-                videoClaimBtn.disabled = true;
-                videoClaimBtn.innerHTML = `<i class="fas fa-check"></i> আজকের জন্য ক্লেইম করা শেষ`;
-                videoInstruction.style.display = 'none'; 
-                if (player) { player.destroy(); player = null; }
-                document.getElementById('youtube-player').innerHTML = '';
-
-            } else {
-                videoTodayStatus.innerText = 'ভিডিও দেখে ক্লেইম করুন।';
-                videoTodayStatus.style.color = '#f97316';
-                videoClaimBtn.disabled = true; 
-                videoClaimBtn.innerHTML = `<i class="fas fa-hourglass-start"></i> ভিডিওটি শেষ হওয়া পর্যন্ত অপেক্ষা করুন`;
-                videoInstruction.style.display = 'block'; 
-                videoWatched = false;
-                
-                // শুধুমাত্র video-claim ট্যাব একটিভ থাকলেই YouTube প্লেয়ার লোড করা
-                if (document.getElementById('video-claim-tab').style.display !== 'none' && window.YT && !player) {
-                    createYouTubePlayer(globalVideoTask.link);
-                }
-            }
-        }
-        
-        // --- ৫. Monetag অ্যাড লজিক (Preload/Show) ---
-        function preloadMonetagAd() {
-            adButton.disabled = false;
-            adButton.innerHTML = `<i class="fas fa-eye"></i> একটি অ্যাড দেখুন ও $${BONUS_AMOUNT.toFixed(2)} ইনকাম করুন`;
-            adButton.style.backgroundColor = '#f97316';
-            if (showMonetagAd) {
-                 showMonetagAd(); // অ্যাড লোড করা
-            }
-        }
-        
-        adButton.addEventListener('click', async function() {
-            if (adButton.disabled) return;
-        
-            adButton.disabled = true;
-            adButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...`;
-            adButton.style.backgroundColor = '#3b82f6';
-        
-            if (showMonetagAd) {
-                 // অ্যাড দেখানোর জন্য সামান্য দেরি
-                 await new Promise(resolve => setTimeout(resolve, 500)); 
-                 showMonetagAd();
-            } else {
-                // অ্যাড লাইব্রেরি লোড না হলে ম্যানুয়াল দেরি
-                await new Promise(resolve => setTimeout(resolve, 2000));
-            }
-        
-            try {
-                // Firestore-এ আপডেট
-                const userRef = db.collection("users").doc(currentUserId);
-                await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(userRef);
-                    let userData = doc.data() || { balance: 0, adCount: 0, lastAdDate: TODAY };
-        
-                    if (userData.adCount >= globalAdLimit) {
-                        throw new Error("Daily limit reached.");
-                    }
-        
-                    const newBalance = (userData.balance || 0) + BONUS_AMOUNT;
-                    const newAdCount = (userData.adCount || 0) + 1;
-        
-                    transaction.update(userRef, {
-                        balance: newBalance,
-                        adCount: newAdCount,
-                        lastAdDate: TODAY
+                    // Create new user entry with necessary fields for leaderboard and profile
+                    const initialPlan = ADMIN_CONFIG['Basic'];
+                    await db.collection('users').doc(String(telegramUserId)).set({
+                        telegramId: telegramUserId,
+                        firstName: telegramUserFirstName, 
+                        lastName: telegramUserLastName, 
+                        plan: 'Basic',
+                        balance: 0.00,
+                        adsRemaining: initialPlan.limit,
+                        joinDate: new Date().toISOString().split('T')[0],
+                        lifetimeEarned: 0.00, 
+                        totalWithdrawn: 0.00,
+                        referralEarned: 0.00,
+                        lastDailyClaim: null 
                     });
-        
-                    document.getElementById('user-balance').innerText = newBalance.toFixed(2);
-                    document.getElementById('ad-count').innerText = newAdCount;
-                    document.getElementById('ad-progress-bar').style.width = `${(newAdCount / globalAdLimit) * 100}%`;
-                });
-        
-                alert(`অভিনন্দন! আপনি $${BONUS_AMOUNT.toFixed(2)} ইনকাম করেছেন।`);
-                loadUserData(currentUserId);
-        
-            } catch (error) {
-                console.error("Ad claim failed:", error);
-                alert("ক্লেইম করা যায়নি: " + (error.message.includes("Daily limit reached") ? "আজকের অ্যাড লিমিট শেষ।" : "ত্রুটি হয়েছে, আবার চেষ্টা করুন।"));
-                loadUserData(currentUserId);
-            }
-        });
-
-        // --- ৬. সোশ্যাল টাস্ক ক্লেইম লজিক ---
-        async function claimSocialReward(taskName, buttonElement) {
-             if (buttonElement.disabled) return;
-             
-             buttonElement.disabled = true;
-             buttonElement.innerText = 'প্রসেস হচ্ছে...';
-             buttonElement.style.backgroundColor = '#3b82f6';
-        
-             const task = SOCIAL_TASKS[taskName];
-             const userRef = db.collection("users").doc(currentUserId);
-        
-             try {
-                 await db.runTransaction(async (transaction) => {
-                     const doc = await transaction.get(userRef);
-                     let userData = doc.data() || { balance: 0 };
-        
-                     if (userData[task.key]) {
-                         throw new Error("Already claimed.");
-                     }
-        
-                     const newBalance = (userData.balance || 0) + task.reward;
-        
-                     // ইউজার ডেটা আপডেট
-                     const updateData = {
-                         balance: newBalance,
-                         [task.key]: true // youtubeSubscribed বা telegramJoined কে true করা
-                     };
-                     transaction.update(userRef, updateData);
-        
-                     document.getElementById('user-balance').innerText = newBalance.toFixed(2);
-                 });
-        
-                 alert(`অভিনন্দন! আপনি $${task.reward.toFixed(2)} বোনাস পেয়েছেন।`);
-                 loadUserData(currentUserId);
-             } catch (error) {
-                 console.error(`Claiming ${taskName} failed:`, error);
-                 alert("ক্লেইম করা যায়নি: " + (error.message.includes("Already claimed") ? "ইতিমধ্যেই ক্লেইম করা হয়েছে।" : "ত্রুটি হয়েছে। লিংক ভিজিট করে আবার চেষ্টা করুন।"));
-                 loadUserData(currentUserId);
-             }
-        }
-        window.claimSocialReward = claimSocialReward;
-
-        // --- ৭. ভিডিও ক্লেইম সাবমিশন লজিক ---
-        document.getElementById('video-claim-btn').addEventListener('click', async function() {
-            if (!videoWatched || this.disabled) return;
-        
-            this.disabled = true;
-            this.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ক্লেইম করা হচ্ছে...`;
-            this.style.backgroundColor = '#3b82f6';
-        
-            try {
-                const userRef = db.collection("users").doc(currentUserId);
-                await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(userRef);
-                    let userData = doc.data() || { balance: 0 };
-        
-                    if (userData.videoClaimDate === TODAY) {
-                        throw new Error("Already claimed for today.");
-                    }
-        
-                    const newBalance = (userData.balance || 0) + globalVideoTask.reward;
-        
-                    transaction.update(userRef, {
-                        balance: newBalance,
-                        videoClaimDate: TODAY
-                    });
-        
-                    document.getElementById('user-balance').innerText = newBalance.toFixed(2);
-                });
-        
-                alert(`অভিনন্দন! আপনি ভিডিও দেখে $${globalVideoTask.reward.toFixed(2)} ক্লেইম করেছেন।`);
-                loadUserData(currentUserId);
-        
-            } catch (error) {
-                console.error("Video claim failed:", error);
-                alert("ভিডিও ক্লেইম করা যায়নি: " + (error.message.includes("Already claimed for today") ? "আজকের ক্লেইম সম্পন্ন হয়েছে।" : "ত্রুটি হয়েছে, আবার চেষ্টা করুন।"));
-                loadUserData(currentUserId);
-            }
-        });
-
-
-        // ** ৮. উইথড্রয়াল লজিক **
-        document.getElementById('withdrawal-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const amount = parseFloat(document.getElementById('amount').value);
-            const method = document.getElementById('method').value;
-            const account = document.getElementById('account').value;
-            
-            const submitBtn = document.querySelector('#withdrawal-form button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> অনুরোধ পাঠানো হচ্ছে...`;
-        
-            try {
-                if (isNaN(amount) || amount <= 0) { throw new Error("পরিমাণ সঠিক নয়।"); }
-                if (amount < globalMinWithdrawal) { throw new Error(`সর্বনিম্ন উইথড্রয়াল $${globalMinWithdrawal} এর কম।`); }
-
-                const userRef = db.collection("users").doc(currentUserId);
-                
-                let success = false;
-                await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(userRef);
-                    let userData = doc.data() || { balance: 0 };
-        
-                    
-                    if (userData.balance < amount) {
-                        throw new Error("অপর্যাপ্ত ব্যালেন্স।");
-                    }
-        
-                    // উইথড্রয়াল রিকোয়েস্ট তৈরি
-                    const withdrawalRequest = {
-                        userId: currentUserId,
-                        username: user.username || user.first_name,
-                        amount: amount,
-                        method: method,
-                        account: account,
-                        status: 'Pending',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-        
-                    // উইথড্রয়াল কালেকশনে যোগ করা
-                    transaction.set(db.collection("withdrawals").doc(), withdrawalRequest);
-        
-                    // ইউজার ব্যালেন্স আপডেট
-                    transaction.update(userRef, {
-                        balance: userData.balance - amount // ব্যালেন্স থেকে টাকা কেটে নেওয়া
-                    });
-                    
-                    document.getElementById('user-balance').innerText = (userData.balance - amount).toFixed(2);
-                    success = true;
-                });
-                
-                if (success) {
-                    alert("উইথড্রয়াল অনুরোধ সফলভাবে পাঠানো হয়েছে। ২৪-৪৮ ঘন্টার মধ্যে পেমেন্ট পেয়ে যাবেন।");
-                    document.getElementById('withdrawal-form').reset();
-                    loadUserData(currentUserId); // নতুন ব্যালেন্স লোড করা
+                    adsRemaining = initialPlan.limit; 
                 }
-        
+                
+                updateUI(userSubscription);
+                
             } catch (error) {
-                console.error("Withdrawal failed:", error);
-                alert("উইথড্রয়াল ব্যর্থ: " + error.message);
+                console.error("Error loading data from Firebase:", error);
+                WebApp.showAlert("Failed to load user data. Please try reopening the app.");
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> অনুরোধ পাঠান`;
-            }
-        });
-
-
-        // ** ৯. ইউটিলিটি ফাংশন **
-        function showTab(tabName, button) { 
-            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-            document.querySelectorAll('.tab-menu button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName + '-tab').style.display = 'block';
-            button.classList.add('active');
-
-            // ভিডিও ট্যাব লজিক
-            if (tabName === 'video-claim') {
-                // শুধু মাত্র তখনই লোড হবে যখন YT API লোড হয়েছে বা লোড করার প্রয়োজন
-                if (window.YT) { 
-                    loadUserData(currentUserId); 
-                } else { 
-                    loadYouTubeAPI(); 
-                }
-            } else if (player) {
-                // অন্য ট্যাবে গেলে প্লেয়ার নষ্ট করে দেওয়া হয় রিসোর্স বাঁচাতে
-                player.destroy(); 
-                player = null;
-                document.getElementById('youtube-player').innerHTML = '';
+                WebApp.MainButton.hideProgress();
+                WebApp.hideMainButton();
             }
         }
-        window.showTab = showTab;
+        
+        async function saveUserData(updates) {
+            if (!telegramUserId) return;
+            try {
+                // Use Set with { merge: true } to save updates without overwriting other fields
+                await db.collection('users').doc(String(telegramUserId)).set(updates, { merge: true });
+                console.log("User data updated in Firebase.");
+            } catch (error) {
+                console.error("Error saving data to Firebase:", error);
+                WebApp.showAlert("Error saving data. Please check your connection.");
+            }
+        }
 
-        function copyReferralLink() {
-            const copyText = document.getElementById("referral-link");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); // For mobile devices
-            navigator.clipboard.writeText(copyText.value).then(() => {
-                alert("রেফার লিংক কপি করা হয়েছে!");
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                alert("কপি করা যায়নি, ম্যানুয়ালি কপি করুন।");
+        // ----------------------------------------------------
+        // 🏆 LEADERBOARD FUNCTIONALITY
+        // ----------------------------------------------------
+
+        async function loadLeaderboardData() {
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading Top Earners...</td></tr>';
+
+            try {
+                // Query Firestore for top 50 users sorted by lifetimeEarned descending
+                const snapshot = await db.collection('users')
+                    .orderBy('lifetimeEarned', 'desc')
+                    .limit(50)
+                    .get();
+
+                const topUsers = [];
+                let myRank = 'N/A';
+                let rank = 1;
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const isCurrentUser = String(data.telegramId) === String(telegramUserId);
+                    
+                    const user = {
+                        rank: rank++,
+                        name: isCurrentUser ? `${data.firstName} ${data.lastName || ''} (You)` : `${data.firstName} ${data.lastName || ''}`,
+                        plan: data.plan || 'Basic',
+                        earned: data.lifetimeEarned || 0.00,
+                        isCurrentUser: isCurrentUser,
+                    };
+                    
+                    topUsers.push(user);
+                    
+                    if (isCurrentUser) {
+                        myRank = user.rank;
+                    }
+                });
+
+                document.getElementById('my-rank').innerText = myRank;
+                document.getElementById('my-lifetime-earned').innerText = totalLifetimeEarned.toFixed(2);
+
+                // Render the table
+                leaderboardBody.innerHTML = ''; 
+                topUsers.forEach((user) => {
+                    const row = leaderboardBody.insertRow();
+                    row.className = user.isCurrentUser ? 'current-user-row' : '';
+                    row.classList.add(`rank-${user.rank}`); 
+                    
+                    const rankCell = row.insertCell();
+                    rankCell.className = 'rank-cell';
+                    if (user.rank <= 3) {
+                         rankCell.innerHTML = `<span class="rank-icon">${user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉'}</span> ${user.rank}`;
+                    } else {
+                        rankCell.innerText = user.rank;
+                    }
+
+                    const nameCell = row.insertCell();
+                    nameCell.className = 'name-cell';
+                    nameCell.innerText = user.name;
+                    
+                    const planCell = row.insertCell();
+                    planCell.className = 'plan-cell';
+                    planCell.innerText = user.plan;
+
+                    const earnedCell = row.insertCell();
+                    earnedCell.style.textAlign = 'right';
+                    earnedCell.style.fontWeight = '700';
+                    earnedCell.innerText = `$${user.earned.toFixed(2)}`;
+                });
+                
+                if (topUsers.length === 0) {
+                     leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users found. Start earning!</td></tr>';
+                }
+
+            } catch (error) {
+                console.error("Error loading leaderboard data:", error);
+                leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--primary-red);">Failed to load leaderboard.</td></tr>';
+            }
+        }
+
+
+        // ----------------------------------------------------
+        // 🟢 EARNING ACTIONS
+        // ----------------------------------------------------
+
+        async function claimDailyBonus() {
+             const reward = ADMIN_CONFIG.DAILY_BONUS_REWARD;
+             
+             // Check if already claimed today (Simplified check, needs proper date logic in a real app)
+             // For simplicity, we just check if it's disabled. In a real app, use Firebase lastDailyClaim.
+             if (document.getElementById('daily-bonus-btn').disabled) {
+                 WebApp.showAlert('You have already claimed your daily bonus.');
+                 return;
+             }
+             
+             currentBalance = parseFloat(currentBalance) + reward; 
+             totalLifetimeEarned = parseFloat(totalLifetimeEarned) + reward; 
+             
+             await saveUserData({ 
+                balance: currentBalance, 
+                lifetimeEarned: totalLifetimeEarned,
+                // lastDailyClaim: new Date().toISOString().split('T')[0] // Implement proper date tracking for real app
+             });
+             
+             WebApp.showAlert(`Daily Bonus claimed successfully! $${reward.toFixed(2)} added.`);
+             document.getElementById('daily-bonus-btn').disabled = true; // Disable until next day reload (simplified)
+             updateUI(userSubscription);
+        }
+        
+        function startAdTask() {
+            if (adsRemaining <= 0) {
+                WebApp.showAlert('🚨 Today\'s ad limit reached! Upgrade your plan for more ads.');
+                return;
+            }
+            
+            const startBtn = document.getElementById('start-ad-btn');
+            startBtn.disabled = true;
+            startBtn.innerText = 'Loading Ad...';
+            
+            if (typeof window.Monetag === 'undefined' || !window.Monetag.isInitialized) {
+                WebApp.showAlert('Monetag SDK not fully loaded. Please wait a moment and try again.');
+                resetAdUI();
+                return;
+            }
+
+            WebApp.showAlert('Attempting to load high-yield ad...');
+
+            window.Monetag.showRewardedAd({
+                zoneId: MONETAG_ZONE_ID, 
+                userId: String(telegramUserId), 
+                
+                onCompleted: function() {
+                    WebApp.showAlert('Ad showed successfully. Claiming reward...');
+                    handleAdReward(); 
+                },
+                onSkipped: function() {
+                    WebApp.showAlert('🚫 Ad skipped or closed prematurely. No reward given.');
+                    resetAdUI();
+                },
+                onError: function(error) {
+                    WebApp.showAlert('⚠️ Ad Error: Could not load ad. Try again later.');
+                    console.error("Monetag Error:", error);
+                    resetAdUI();
+                }
             });
         }
-        window.copyReferralLink = copyReferralLink;
 
-        // ** ১০. ইনিশিয়ালাইজেশন **
-        if (currentUserId) {
-            loadUserData(currentUserId);
-            // রেফারেল লিঙ্ক আপডেট করা
-            const referralLinkInput = document.getElementById('referral-link');
-            if(referralLinkInput) {
-                // start_param এর মধ্যে রেফার আইডি যুক্ত করা
-                referralLinkInput.value = `https://t.me/easyearningsads_bot?start=ref${currentUserId}`;
-            }
-        } else {
-             alert("ইউজার আইডি লোড হচ্ছে না। দয়া করে টেলিগ্রাম অ্যাপ থেকে আবার চেষ্টা করুন।");
-             // টেস্টিং এর জন্য, আপনি এখানে একটি ডামি লোড করতে পারেন:
-             // loadUserData("TEST_USER_12345");
+        async function handleAdReward() {
+            const earningPerAd = ADMIN_CONFIG[userSubscription].earning;
+            
+            currentBalance = parseFloat(currentBalance) + earningPerAd;
+            adsRemaining -= 1;
+            totalLifetimeEarned = parseFloat(totalLifetimeEarned) + earningPerAd; 
+
+            await saveUserData({ 
+                balance: currentBalance, 
+                adsRemaining: adsRemaining, 
+                lifetimeEarned: totalLifetimeEarned 
+            });
+
+            WebApp.showAlert(`💰 Success! $${earningPerAd.toFixed(3)} added to your balance.`);
+            resetAdUI();
         }
+
+        function resetAdUI() {
+            const startBtn = document.getElementById('start-ad-btn');
+            
+            document.getElementById('ad-limit').innerText = adsRemaining; 
+            startBtn.disabled = false;
+            startBtn.innerText = 'Start Ad';
+            WebApp.closePopup();
+            updateUI(userSubscription);
+        }
+        
+        async function startYoutubeTask() {
+             WebApp.openLink('https://www.youtube.com/watch?v=dQw4w9WgXcQ'); 
+
+             WebApp.showPopup({
+                title: 'Video Watched?',
+                message: 'Did you watch the entire video and complete the required action? (This is a simplified check)',
+                buttons: [
+                    {id: 'yes', type: 'default', text: 'Yes, I completed it'},
+                    {id: 'no', type: 'cancel', text: 'Not yet'}
+                ]
+            }, async (buttonId) => {
+                if (buttonId === 'yes') {
+                    const reward = ADMIN_CONFIG.YOUTUBE_REWARD;
+                    currentBalance = parseFloat(currentBalance) + reward;
+                    totalLifetimeEarned = parseFloat(totalLifetimeEarned) + reward;
+                    await saveUserData({ balance: currentBalance, lifetimeEarned: totalLifetimeEarned });
+                    WebApp.showAlert(`📺 Task complete! $${reward.toFixed(2)} added.`);
+                    updateUI(userSubscription);
+                }
+            });
+        }
+
+        // ----------------------------------------------------
+        // 🟢 UI / NAVIGATION LOGIC
+        // ----------------------------------------------------
+
+        function updateUI(status) {
+            const config = ADMIN_CONFIG[status] || ADMIN_CONFIG['Basic'];
+            
+            // --- Global Config Update (UI) ---
+            document.getElementById('daily-bonus-btn').innerText = `Claim $${ADMIN_CONFIG.DAILY_BONUS_REWARD.toFixed(2)}`;
+            document.getElementById('youtube-reward-text').innerText = `$${ADMIN_CONFIG.YOUTUBE_REWARD.toFixed(2)}`;
+            document.getElementById('min-withdraw-amount').innerText = ADMIN_CONFIG.MIN_WITHDRAWAL.toFixed(2);
+            document.getElementById('withdraw-amount').min = ADMIN_CONFIG.MIN_WITHDRAWAL.toFixed(2);
+            document.getElementById('referral-rate').innerText = ADMIN_CONFIG.REFERRAL_RATE;
+            document.getElementById('support-link').href = ADMIN_CONFIG.SUPPORT_TELEGRAM_LINK; 
+            document.getElementById('official-channel-name').innerText = `@${BOT_USERNAME}`; 
+            
+            // --- Balance and Statistics Update ---
+            document.getElementById('current-balance').innerText = `$${currentBalance.toFixed(2)}`;
+            document.getElementById('withdraw-balance').innerText = currentBalance.toFixed(2);
+            document.getElementById('profile-current-balance').innerText = `$${currentBalance.toFixed(2)}`;
+            document.getElementById('profile-lifetime-earned').innerText = `$${totalLifetimeEarned.toFixed(2)}`;
+            document.getElementById('profile-total-withdrawn').innerText = `$${totalWithdrawn.toFixed(2)}`;
+            document.getElementById('profile-referral-earned').innerText = `$${totalReferralEarned.toFixed(2)}`;
+            document.getElementById('ref-earnings').innerText = `$${totalReferralEarned.toFixed(2)}`;
+            document.getElementById('profile-join-date').innerText = joinDate;
+
+            // --- Plan Status Update ---
+            document.getElementById('premium-status').innerText = status;
+            
+            // --- Task Section Update ---
+            document.getElementById('ad-limit').innerText = adsRemaining;
+            document.getElementById('earning-per-ad').innerText = config.earning.toFixed(3);
+            document.getElementById('ad-task-title').innerText = `${status} Ad Task (Limit: ${config.limit})`;
+            
+            // --- Premium Section Update (Data & Highlight) ---
+            document.querySelectorAll('.package-card').forEach(card => card.classList.remove('active-package-card', 'selected'));
+            document.getElementById('package-' + status.toLowerCase().replace(' ', '-')).classList.add('active-package-card');
+            
+            const teaser = document.getElementById('premium-ad-teaser');
+            if (status === 'Basic') {
+                teaser.style.display = 'flex';
+                document.getElementById('low-earning-warning').style.display = 'block';
+            } else {
+                teaser.style.display = 'none';
+                document.getElementById('low-earning-warning').style.display = 'none';
+            }
+
+            document.getElementById('basic-limit').innerText = ADMIN_CONFIG['Basic'].limit;
+            document.getElementById('basic-rate').innerText = ADMIN_CONFIG['Basic'].rate;
+            document.getElementById('standard-limit').innerText = ADMIN_CONFIG['Standard Pro'].limit;
+            document.getElementById('standard-rate').innerText = ADMIN_CONFIG['Standard Pro'].rate;
+            document.getElementById('vip-limit').innerText = ADMIN_CONFIG['VIP Ultimate'].limit;
+            document.getElementById('vip-rate').innerText = ADMIN_CONFIG['VIP Ultimate'].rate;
+        }
+
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+            document.getElementById(sectionId + '-section').style.display = 'block';
+            document.querySelectorAll('.nav-buttons button').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            if (sectionId === 'premium') renderPaymentMethods();
+            if (sectionId === 'leaderboard') loadLeaderboardData(); 
+        }
+
+        function selectPackage(packageName, price) {
+            selectedPackage = packageName;
+            document.querySelectorAll('.package-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById('package-' + packageName.toLowerCase().replace(' ', '-')).classList.add('selected');
+            
+            document.getElementById('final-purchase-btn').style.display = 'block';
+            document.getElementById('final-purchase-btn').innerText = `Confirm Purchase (${packageName} for $${price.toFixed(2)})`;
+        }
+
+        function confirmPurchase() {
+            if (!selectedPackage || !selectedMethod) {
+                WebApp.showAlert('Please select both a **Package** and a **Payment Method**.');
+                return;
+            }
+            
+            const price = ADMIN_CONFIG[selectedPackage].price;
+            
+            WebApp.showPopup({
+                title: 'Confirm Purchase',
+                message: `You are about to purchase the **${selectedPackage}** plan for **$${price.toFixed(2)}** using **${selectedMethod}**. Do you wish to proceed?`,
+                buttons: [
+                    {id: 'yes', type: 'default', text: 'Yes, Proceed'},
+                    {id: 'no', type: 'cancel', text: 'Cancel'}
+                ]
+            }, (buttonId) => {
+                if (buttonId === 'yes') {
+                    const transactionData = {
+                        userId: telegramUserId,
+                        package: selectedPackage,
+                        amount: price,
+                        method: selectedMethod,
+                        timestamp: new Date().toISOString(),
+                        status: 'Pending'
+                    };
+                    
+                    db.collection('transactions').add(transactionData)
+                        .then(() => {
+                            WebApp.showAlert(`✅ Purchase initiated! Please complete your payment and send the Transaction ID to support for activation.`);
+                        })
+                        .catch(error => {
+                            WebApp.showAlert('Error creating transaction: ' + error.message);
+                        });
+                }
+            });
+        }
+        
+        function renderPaymentMethods() {
+            const list = document.getElementById('payment-methods-list');
+            list.innerHTML = ''; 
+            
+            ADMIN_PAYMENT_METHODS.forEach(method => {
+                const card = document.createElement('div');
+                card.className = 'payment-method-card';
+                card.onclick = () => selectPaymentMethod(method.name);
+                card.innerHTML = `
+                    <div class="method-details">
+                        <span class="method-icon">${method.icon}</span>
+                        <div class="method-info">
+                            <span>${method.name}</span>
+                            <small>${method.details}</small>
+                        </div>
+                    </div>
+                    <button class="btn-select-method" data-method="${method.name}">Select</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+        
+        function selectPaymentMethod(methodName) {
+            selectedMethod = methodName;
+            document.querySelectorAll('.payment-method-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll(`[data-method="${methodName}"]`).forEach(btn => {
+                btn.closest('.payment-method-card').classList.add('selected');
+            });
+            WebApp.showAlert(`Payment method selected: ${methodName}`);
+        }
+        
+        document.getElementById('withdrawal-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const network = document.getElementById('withdraw-network').value;
+            const address = document.getElementById('wallet-address').value;
+            const minWithdrawal = ADMIN_CONFIG.MIN_WITHDRAWAL;
+            
+            if (amount < minWithdrawal) {
+                WebApp.showAlert(`Withdrawal amount must be at least $${minWithdrawal.toFixed(2)}.`);
+                return;
+            }
+            if (amount > currentBalance) {
+                WebApp.showAlert('Insufficient balance for withdrawal.');
+                return;
+            }
+            
+            WebApp.showPopup({
+                title: 'Confirm Withdrawal',
+                message: `Withdraw $${amount.toFixed(2)} USDT to ${network} network. Confirm wallet address: ${address}?`,
+                buttons: [
+                    {id: 'confirm', type: 'default', text: 'Confirm'},
+                    {id: 'cancel', type: 'cancel', text: 'Cancel'}
+                ]
+            }, async (buttonId) => {
+                if (buttonId === 'confirm') {
+                    currentBalance -= amount;
+                    
+                    const withdrawalData = {
+                        userId: telegramUserId,
+                        amount: amount,
+                        network: network,
+                        address: address,
+                        timestamp: new Date().toISOString(),
+                        status: 'Requested',
+                    };
+
+                    await db.collection('withdrawal_requests').add(withdrawalData);
+                    await saveUserData({ balance: currentBalance }); 
+                    
+                    WebApp.showAlert('✅ Withdrawal request submitted! It will be processed within 24-48 hours.');
+                    updateUI(userSubscription);
+                    document.getElementById('withdrawal-form').reset();
+                }
+            });
+        });
+
+        function copyReferralLink() {
+            const link = document.getElementById('referral-link').innerText;
+            navigator.clipboard.writeText(link).then(() => {
+                WebApp.showAlert('🔗 Referral Link copied to clipboard!');
+            }, (err) => {
+                WebApp.showAlert('Failed to copy link: ' + err);
+            });
+        }
+
+
+        // ----------------------------------------------------
+        // 🟢 INITIAL SETUP
+        // ----------------------------------------------------
+        
+        (function initialSetup() {
+            if (WebApp.initDataUnsafe && WebApp.initDataUnsafe.user) {
+                const user = WebApp.initDataUnsafe.user;
+                telegramUserId = user.id; 
+                
+                telegramUserFirstName = user.first_name || 'User'; 
+                telegramUserLastName = user.last_name || ""; 
+                
+                const fullName = telegramUserFirstName + (telegramUserLastName ? ' ' + telegramUserLastName : '');
+                const username = user.username ? `@${user.username}` : 'N/A';
+                
+                document.getElementById('profile-full-name').innerText = fullName;
+                document.getElementById('profile-tg-username').innerText = username;
+                document.getElementById('profile-tg-id').innerText = user.id;
+                
+                document.getElementById('referral-link').innerText = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+            } else {
+                 // Fallback for testing outside TWA (Change these for live bot testing)
+                 telegramUserId = 12345678; 
+                 telegramUserFirstName = 'Test';
+                 telegramUserLastName = 'User';
+                 document.getElementById('profile-full-name').innerText = 'Test User';
+                 document.getElementById('profile-tg-username').innerText = '@testuser';
+                 document.getElementById('profile-tg-id').innerText = telegramUserId;
+                 document.getElementById('referral-link').innerText = `https://t.me/${BOT_USERNAME}?start=12345678`;
+            }
+            
+            loadUserData(); 
+            showSection('tasks', document.getElementById('nav-tasks'));
+        })();
+        
     </script>
 </body>
-
 </html>
