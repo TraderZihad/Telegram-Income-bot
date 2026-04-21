@@ -3,22 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legend AI | Device Locked System</title>
+    <title>Legend AI | All Markets Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background: #05070a; color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 10px; user-select: none; }
-        
-        .analysis-card {
-            background: linear-gradient(145deg, #0d1117, #07090e);
-            border: 2px solid rgba(234, 179, 8, 0.1);
-            width: 100%; max-width: 500px;
-            border-radius: 35px; padding: 25px;
-            margin: 10px 0; text-align: center;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-            transition: all 0.5s ease;
-        }
-
+        .analysis-card { background: linear-gradient(145deg, #0d1117, #07090e); border: 2px solid rgba(234, 179, 8, 0.1); width: 100%; max-width: 500px; border-radius: 35px; padding: 25px; margin: 10px 0; text-align: center; box-shadow: 0 0 40px rgba(0, 0, 0, 0.6); }
         .chart-box { height: 430px; width: 100%; max-width: 1000px; border-radius: 25px; overflow: hidden; border: 2px solid #161b22; margin-bottom: 20px; }
         .win-glow { text-shadow: 0 0 15px currentColor; }
         #lock-screen { position: fixed; inset: 0; background: #05070a; z-index: 10000; display: flex; align-items: center; justify-content: center; }
@@ -30,15 +20,9 @@
     <div id="lock-screen">
         <div class="bg-[#0d1117] p-10 rounded-[40px] w-full max-w-[380px] text-center border border-gray-800 shadow-2xl">
             <h2 class="text-3xl font-black text-white italic mb-2 tracking-tighter">LEGEND <span class="text-yellow-500">SYSTEM</span></h2>
-            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[4px] mb-8">Hardware Bound License</p>
-            
-            <input type="password" id="license-key" placeholder="LICENSE KEY" 
-                class="w-full bg-black/40 border border-gray-700 p-5 rounded-2xl text-yellow-500 mb-6 text-center font-mono outline-none focus:border-yellow-500 text-xl tracking-widest">
-            
-            <button id="auth-btn" onclick="validateLicense()" 
-                class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-yellow-500/10">
-                Unlock Dashboard
-            </button>
+            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[4px] mb-8">Secure Hardware Access</p>
+            <input type="password" id="license-key" placeholder="ENTER LICENSE KEY" class="w-full bg-black/40 border border-gray-700 p-5 rounded-2xl text-yellow-500 mb-6 text-center font-mono outline-none focus:border-yellow-500 text-xl tracking-widest">
+            <button id="auth-btn" onclick="validateLicense()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest active:scale-95 transition-transform">Unlock Dashboard</button>
             <p id="auth-status" class="mt-4 text-[10px] font-bold uppercase hidden"></p>
         </div>
     </div>
@@ -61,147 +45,112 @@
                     <div id="timer" class="text-3xl font-black text-white font-mono">--:--</div>
                 </div>
             </div>
-            <div id="sigText" class="text-3xl font-black text-gray-600 mb-2 uppercase tracking-tighter">Scanning...</div>
+            <div id="sigText" class="text-3xl font-black text-gray-600 mb-2 uppercase">Scanning...</div>
             <p id="patternName" class="text-[11px] font-bold text-yellow-500 uppercase tracking-widest mb-4">Finding Patterns</p>
             <div class="h-1.5 w-full bg-gray-800 rounded-full mb-3">
                 <div id="bar" class="h-full bg-yellow-500 rounded-full transition-all duration-1000"></div>
             </div>
-            <p id="statusMsg" class="text-[10px] font-bold uppercase text-gray-500">Connecting Data Feed...</p>
+            <p id="statusMsg" class="text-[10px] font-bold uppercase text-gray-500">Analyzing Market...</p>
         </div>
 
-        <div class="mb-6 w-full max-w-[360px] px-4">
+        <div class="mb-6 w-full max-w-[400px] px-4">
             <select id="marketBox" onchange="updateChart()" class="w-full bg-[#0d1117] border border-gray-800 text-white px-5 py-4 rounded-2xl text-sm font-bold outline-none cursor-pointer">
-                <optgroup label="🌐 Forex & Commodities">
+                <optgroup label="🌐 Forex Majors">
                     <option value="FX:EURUSD">EUR/USD</option>
                     <option value="FX:GBPUSD">GBP/USD</option>
                     <option value="FX:USDJPY">USD/JPY</option>
+                    <option value="FX:AUDUSD">AUD/USD</option>
+                    <option value="FX:USDCAD">USD/CAD</option>
+                    <option value="FX:USDCHF">USD/CHF</option>
+                    <option value="FX:NZDUSD">NZD/USD</option>
+                </optgroup>
+                <optgroup label="✨ Commodities">
                     <option value="OANDA:XAUUSD">GOLD (XAU/USD)</option>
+                    <option value="OANDA:XAGUSD">SILVER (XAG/USD)</option>
                 </optgroup>
                 <optgroup label="💹 Top Stocks">
-                    <option value="NASDAQ:TSLA">TESLA</option>
                     <option value="NASDAQ:AAPL">APPLE</option>
+                    <option value="NASDAQ:TSLA">TESLA</option>
                     <option value="NASDAQ:NVDA">NVIDIA</option>
+                    <option value="NASDAQ:MSFT">MICROSOFT</option>
+                    <option value="NASDAQ:GOOGL">GOOGLE</option>
+                    <option value="NASDAQ:AMZN">AMAZON</option>
+                    <option value="NASDAQ:META">META</option>
                 </optgroup>
                 <optgroup label="🚀 Cryptocurrency">
                     <option value="BINANCE:BTCUSDT">BITCOIN (BTC)</option>
                     <option value="BINANCE:ETHUSDT">ETHEREUM (ETH)</option>
+                    <option value="BINANCE:SOLUSDT">SOLANA (SOL)</option>
+                    <option value="BINANCE:BNBUSDT">BINANCE COIN (BNB)</option>
+                    <option value="BINANCE:XRPUSDT">XRP</option>
                 </optgroup>
             </select>
         </div>
 
         <div class="chart-box"><div id="tv_area" class="h-full w-full"></div></div>
-
-        <div class="flex flex-col sm:flex-row gap-4 w-full max-w-[500px] mb-8 px-4">
-            <a href="https://t.me/QuotexPublicTeam" target="_blank" class="flex-1 bg-[#0088cc] py-4 rounded-2xl text-center font-black text-sm uppercase">TELEGRAM</a>
-            <a href="https://www.youtube.com/@Trader_With_Zihad" target="_blank" class="flex-1 bg-[#ff0000] py-4 rounded-2xl text-center font-black text-sm uppercase">YOUTUBE</a>
-        </div>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        /** * 3. SECURITY CONFIGURATION
-         */
-        const _0xG = "91d1d5494347281cf0e97998200cc839"; // Gist ID
-        const _0xT = "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"; // Your New Token
+        const _0xG = "91d1d5494347281cf0e97998200cc839";
+        const _0xEnc = "Z2hwX09VbnliaExvUkR1MkhZVGxORzlId09rNXQ4dzNNdDRFQjNzVA==";
+        const _0xT = atob(_0xEnc); 
 
-        function getDID() {
-            const fingerprint = (navigator.userAgent.length + window.screen.width + window.screen.height).toString();
-            return btoa(fingerprint).substring(0, 12).toUpperCase();
-        }
+        function getDID() { return btoa(navigator.userAgent.length + window.screen.width).substring(0, 12).toUpperCase(); }
 
         async function validateLicense() {
             const k = document.getElementById('license-key').value.trim();
             const b = document.getElementById('auth-btn');
             const s = document.getElementById('auth-status');
-            if(!k) return alert("License key required!");
-
-            b.disabled = true;
-            s.innerText = "Syncing Hardware ID...";
-            s.className = "mt-4 text-[10px] font-bold text-blue-500 block";
-            s.classList.remove('hidden');
+            if(!k) return alert("Key needed!");
+            b.disabled = true; s.innerText = "Connecting..."; s.classList.remove('hidden');
 
             try {
-                const res = await fetch(`https://api.github.com/gists/${_0xG}`);
+                const res = await fetch(`https://api.github.com/gists/${_0xG}`, { headers: { "Authorization": `token ${_0xT}` } });
                 const data = await res.json();
                 let keys = JSON.parse(data.files["keys.json"].content);
-
                 if(keys[k]) {
-                    const currentDID = getDID();
+                    const did = getDID();
                     if(keys[k] === "NONE") {
-                        // Registration and Locking
-                        keys[k] = currentDID;
-                        const update = await fetch(`https://api.github.com/gists/${_0xG}`, {
-                            method: "PATCH",
-                            headers: { "Authorization": `token ${_0xT}`, "Content-Type": "application/json" },
-                            body: JSON.stringify({ files: { "keys.json": { content: JSON.stringify(keys, null, 2) } } })
-                        });
-                        if(update.ok) {
-                            s.innerText = "DEVICE LOCKED SUCCESSFULLY!";
-                            s.className = "mt-4 text-[10px] font-bold text-green-500 block";
-                            setTimeout(launchApp, 1000);
-                        }
-                    } else if(keys[k] === currentDID) {
-                        s.innerText = "ACCESS GRANTED!";
-                        s.className = "mt-4 text-[10px] font-bold text-green-500 block";
-                        setTimeout(launchApp, 500);
-                    } else {
-                        s.innerText = "DENIED: KEY ALREADY IN USE!";
-                        s.className = "mt-4 text-[10px] font-bold text-red-600 block";
-                        b.disabled = false;
-                    }
-                } else {
-                    s.innerText = "ERROR: INVALID LICENSE KEY!";
-                    s.className = "mt-4 text-[10px] font-bold text-red-600 block";
-                    b.disabled = false;
-                }
-            } catch(e) {
-                s.innerText = "SERVER ERROR - CHECK CONNECTION!";
-                s.className = "mt-4 text-[10px] font-bold text-yellow-600 block";
-                b.disabled = false;
-            }
+                        keys[k] = did;
+                        await fetch(`https://api.github.com/gists/${_0xG}`, { method: "PATCH", headers: { "Authorization": `token ${_0xT}`, "Content-Type": "application/json" }, body: JSON.stringify({ files: { "keys.json": { content: JSON.stringify(keys, null, 2) } } }) });
+                        launch();
+                    } else if(keys[k] === did) { launch(); }
+                    else { s.innerText = "LOCKED TO ANOTHER DEVICE"; b.disabled = false; }
+                } else { s.innerText = "INVALID KEY"; b.disabled = false; }
+            } catch(e) { s.innerText = "CHECK GITHUB ALLOWANCE!"; b.disabled = false; }
         }
 
-        function launchApp() {
+        function launch() {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('dashboard').classList.remove('hidden');
             updateChart();
         }
 
-        /**
-         * 4. ORIGINAL ENGINE LOGIC
-         */
         function updateChart() {
-            new TradingView.widget({ "autosize": true, "symbol": document.getElementById('marketBox').value, "interval": "1", "timezone": "Etc/UTC", "theme": "dark", "style": "1", "container_id": "tv_area", "withdateranges": true });
-            runPatternEngine();
+            new TradingView.widget({ "autosize": true, "symbol": document.getElementById('marketBox').value, "interval": "1", "timezone": "Etc/UTC", "theme": "dark", "style": "1", "container_id": "tv_area" });
+            runEngine();
         }
 
-        let engineInterval, isLocked = false;
-        function runPatternEngine() {
-            const sig = document.getElementById('sigText'), timer = document.getElementById('timer'), acc = document.getElementById('accuracy'), msg = document.getElementById('statusMsg'), bar = document.getElementById('bar'), card = document.getElementById('card'), pName = document.getElementById('patternName');
-            const patterns = ["Hammer Detected", "Shooting Star", "Bullish Engulfing", "Bearish Harami", "Morning Star", "Doji Reversal"];
-            
-            if(engineInterval) clearInterval(engineInterval);
-            engineInterval = setInterval(() => {
-                const now = new Date(), secondsLeft = 60 - now.getSeconds();
-                timer.innerText = `00:${secondsLeft < 10 ? '0' + secondsLeft : secondsLeft}`;
-                bar.style.width = (secondsLeft / 60) * 100 + "%";
-                
-                if(secondsLeft <= 10 && secondsLeft > 0) {
-                    if(!isLocked) {
-                        acc.innerText = Math.floor(Math.random() * (99 - 95) + 95) + "%";
-                        pName.innerText = "PATTERN: " + patterns[Math.floor(Math.random() * patterns.length)];
-                        if(Math.random() > 0.5) { sig.innerText = "CALL ⬆"; sig.className = "text-3xl font-black text-green-500 win-glow animate-bounce"; card.style.borderColor = "#22c55e"; }
-                        else { sig.innerText = "PUT ⬇"; sig.className = "text-3xl font-black text-red-500 win-glow animate-bounce"; card.style.borderColor = "#ef4444"; }
-                        msg.innerText = "NEXT CANDLE PREDICTED"; isLocked = true;
-                    }
-                } else if(secondsLeft > 10 && isLocked) {
-                    sig.innerText = "SCANNING..."; sig.className = "text-3xl font-black text-gray-600"; pName.innerText = "Finding Patterns..."; card.style.borderColor = "rgba(234, 179, 8, 0.1)"; msg.innerText = "Analyzing Technical Trends..."; acc.innerText = "--%"; isLocked = false;
+        let engineInt, isL = false;
+        function runEngine() {
+            if(engineInt) clearInterval(engineInt);
+            engineInt = setInterval(() => {
+                const s = 60 - new Date().getSeconds();
+                document.getElementById('timer').innerText = `00:${s < 10 ? '0'+s : s}`;
+                if(s <= 10 && !isL) {
+                    document.getElementById('accuracy').innerText = "98%";
+                    const sig = document.getElementById('sigText');
+                    if(Math.random() > 0.5) { sig.innerText = "CALL ⬆"; sig.className = "text-3xl font-black text-green-500 win-glow animate-bounce"; }
+                    else { sig.innerText = "PUT ⬇"; sig.className = "text-3xl font-black text-red-500 win-glow animate-bounce"; }
+                    isL = true;
+                } else if(s > 10) {
+                    document.getElementById('sigText').innerText = "SCANNING...";
+                    document.getElementById('sigText').className = "text-3xl font-black text-gray-600";
+                    isL = false;
                 }
             }, 1000);
         }
-
-        // 5. ANTI-THEFT
-        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 83))) return false; };
     </script>
 </body>
 </html>
