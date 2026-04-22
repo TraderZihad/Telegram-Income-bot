@@ -22,7 +22,6 @@
         .chart-box { height: 430px; width: 100%; max-width: 1000px; border-radius: 25px; overflow: hidden; border: 2px solid #161b22; margin-bottom: 20px; }
         .win-glow { text-shadow: 0 0 15px currentColor; }
         #lock { position: fixed; inset: 0; background: #05070a; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        select option { background: #0d1117; color: white; }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -32,8 +31,8 @@
         <div class="bg-[#0d1117] p-10 rounded-[40px] w-full max-w-[380px] text-center border border-gray-800">
             <h2 class="text-3xl font-black text-white italic mb-2 tracking-tighter">LEGEND <span class="text-yellow-500">SYSTEM</span></h2>
             <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[4px] mb-8">Candlestick Logic Licensed</p>
-            <input type="text" id="keyInput" placeholder="LICENSE KEY" class="w-full bg-black/40 border border-gray-700 p-5 rounded-2xl text-white mb-6 text-center font-mono outline-none focus:border-yellow-500 text-xl">
-            <button id="unlockBtn" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest transition-all active:scale-95">Unlock Dashboard</button>
+            <input type="text" id="keyInput" placeholder="LICENSE KEY" class="w-full bg-black/40 border border-gray-700 p-5 rounded-2xl text-white mb-6 text-center font-mono outline-none focus:border-yellow-500 text-xl uppercase">
+            <button id="unlockBtn" onclick="access()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest transition-all active:scale-95">Unlock Dashboard</button>
             <p id="authStatus" class="mt-4 text-xs font-bold text-gray-500"></p>
         </div>
     </div>
@@ -99,6 +98,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // আপডেট করা ফায়ারবেস কনফিগ
         const firebaseConfig = {
             apiKey: "AIzaSyAiYjDas0uf7rnEhPNZPATMRoH-A6J05m8",
             authDomain: "license-system-e72f4.firebaseapp.com",
@@ -106,32 +106,33 @@
             storageBucket: "license-system-e72f4.firebasestorage.app",
             messagingSenderId: "91030410189",
             appId: "1:91030410189:web:36d474a582a0b386876a84",
-            databaseURL: "https://license-system-e72f4-default-rtdb.firebaseio.com"
+            databaseURL: "https://license-system-e72f4-default-rtdb.firebaseio.com/"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Telegram User ID Fetching
+        // Telegram WebApp Setup
         const tg = window.Telegram.WebApp;
+        tg.expand();
         const userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "GUEST_USER";
 
         async function access() {
-            const key = document.getElementById('keyInput').value.trim();
+            const key = document.getElementById('keyInput').value.trim().toUpperCase();
             const status = document.getElementById('authStatus');
             const btn = document.getElementById('unlockBtn');
 
             if (!key) {
-                status.innerText = "Error: Please enter a key!";
-                status.style.color = "#ef4444";
+                alert("Please enter a valid License Key!");
                 return;
             }
 
-            status.innerText = "Checking License...";
+            status.innerText = "Connecting to Secure Server...";
             status.style.color = "#eab308";
             btn.disabled = true;
 
             try {
+                // ডাটাবেজে license_keys ফোল্ডারে চেক করা হচ্ছে
                 const licenseRef = ref(db, 'license_keys/' + key);
                 const snapshot = await get(licenseRef);
 
@@ -139,37 +140,43 @@
                     const data = snapshot.val();
 
                     if (data.status !== "active") {
-                        status.innerText = "This license is inactive!";
+                        status.innerText = "Error: This license is suspended!";
+                        status.style.color = "#ef4444";
                         btn.disabled = false;
                         return;
                     }
 
-                    // Validation Logic: Check if assigned or empty
+                    // চেক: লাইসেন্সটি কি নতুন নাকি এই ইউজারের জন্য লক করা?
                     if (data.assigned_to === "" || data.assigned_to === userId) {
+                        
                         if (data.assigned_to === "") {
+                            // প্রথমবারের জন্য আইডি লক করা হচ্ছে
                             await update(licenseRef, { assigned_to: userId });
+                            alert("Success: License activated for this Telegram ID!");
                         }
                         
-                        // Access Granted
+                        // ড্যাশবোর্ড ওপেন
                         document.getElementById('lock').style.display = 'none';
                         document.getElementById('dashboard').classList.remove('hidden');
                         updateChart();
                     } else {
-                        status.innerText = "Already used on another Telegram ID!";
+                        status.innerText = "Blocked: Used on another Telegram ID!";
+                        status.style.color = "#ef4444";
                         btn.disabled = false;
                     }
                 } else {
-                    status.innerText = "Invalid License Key!";
+                    status.innerText = "Error: Invalid License Key!";
+                    status.style.color = "#ef4444";
                     btn.disabled = false;
                 }
             } catch (error) {
                 console.error(error);
-                status.innerText = "Connection Error!";
+                alert("Database Error: " + error.message);
                 btn.disabled = false;
             }
         }
 
-        window.access = access; // Global exposure for button click
+        window.access = access; 
     </script>
 
     <script>
