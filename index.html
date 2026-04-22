@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Legend AI | Candlestick Pattern Expert</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background: #05070a; color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
@@ -32,9 +34,9 @@
     <div id="lock">
         <div class="bg-[#0d1117] p-10 rounded-[40px] w-full max-w-[380px] text-center border border-gray-800">
             <h2 class="text-3xl font-black text-white italic mb-2 tracking-tighter">LEGEND <span class="text-yellow-500">SYSTEM</span></h2>
-            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[4px] mb-8">Candlestick Logic Licensed</p>
+            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[4px] mb-8">Telegram ID Linked Security</p>
             <input type="text" id="key" placeholder="LICENSE KEY" class="w-full bg-black/40 border border-gray-700 p-5 rounded-2xl text-white mb-6 text-center font-mono outline-none focus:border-yellow-500 text-xl">
-            <button onclick="access()" id="unlockBtn" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest">Unlock Dashboard</button>
+            <button onclick="verifyKey()" id="unlockBtn" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest">Unlock Dashboard</button>
             <p id="loginMsg" class="mt-4 text-xs font-bold uppercase tracking-widest text-red-500"></p>
         </div>
     </div>
@@ -97,7 +99,10 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // Firebase Configuration
+        // Telegram & Firebase Setup
+        const tg = window.Telegram.WebApp;
+        tg.expand(); 
+
         const firebaseConfig = {
             apiKey: "AIzaSyAiYjDas0uf7rnEhPNZPATMRoH-A6J05m8",
             authDomain: "license-system-e72f4.firebaseapp.com",
@@ -108,11 +113,10 @@
             appId: "1:91030410189:web:36d474a582a0b386876a84"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function access() {
+        function verifyKey() {
             const key = document.getElementById('key').value.trim();
             const loginMsg = document.getElementById('loginMsg');
             const unlockBtn = document.getElementById('unlockBtn');
@@ -122,20 +126,36 @@
                 return;
             }
 
-            unlockBtn.innerText = "Verifying...";
+            unlockBtn.innerText = "Verifying ID...";
             unlockBtn.disabled = true;
 
-            // Database checking
+            // টেলিগ্রাম থেকে ইউজার আইডি নেওয়া (না থাকলে ডিফল্ট আইডি)
+            const telegramUser = tg.initDataUnsafe.user;
+            const currentTgId = telegramUser ? telegramUser.id.toString() : "Unknown_User";
+
             const dbRef = database.ref('license_keys/' + key);
             dbRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    if (data.status === 'active') {
-                        document.getElementById('lock').style.display = 'none';
-                        document.getElementById('dashboard').classList.remove('hidden');
-                        updateChart();
-                    } else {
-                        loginMsg.innerText = "This license is " + data.status + "!";
+                    
+                    if (data.status !== 'active') {
+                        loginMsg.innerText = "License is " + data.status + "!";
+                        unlockBtn.innerText = "Unlock Dashboard";
+                        unlockBtn.disabled = false;
+                    } 
+                    // যদি কি-তে আগে কোনো টেলিগ্রাম আইডি না থাকে (First Time Login)
+                    else if (!data.telegram_id) {
+                        dbRef.update({ telegram_id: currentTgId }).then(() => {
+                            startApp();
+                        });
+                    } 
+                    // যদি সেভ করা টেলিগ্রাম আইডি আর বর্তমান আইডি মিলে যায়
+                    else if (data.telegram_id === currentTgId) {
+                        startApp();
+                    } 
+                    // যদি অন্য টেলিগ্রাম অ্যাকাউন্ট হয়
+                    else {
+                        loginMsg.innerText = "Locked to another Telegram account!";
                         unlockBtn.innerText = "Unlock Dashboard";
                         unlockBtn.disabled = false;
                     }
@@ -144,72 +164,57 @@
                     unlockBtn.innerText = "Unlock Dashboard";
                     unlockBtn.disabled = false;
                 }
-            }, (error) => {
-                loginMsg.innerText = "Connection Error!";
-                unlockBtn.disabled = false;
             });
         }
 
+        function startApp() {
+            document.getElementById('lock').style.display = 'none';
+            document.getElementById('dashboard').classList.remove('hidden');
+            updateChart();
+        }
+
+        // TradingView & Engine (Your existing logic)
         function updateChart() {
             new TradingView.widget({ 
                 "autosize": true, 
                 "symbol": document.getElementById('marketBox').value, 
                 "interval": "1", 
-                "timezone": "Etc/UTC", 
                 "theme": "dark", 
-                "style": "1", 
-                "container_id": "tv_area", 
-                "withdateranges": true 
+                "container_id": "tv_area" 
             });
             runPatternEngine();
         }
 
         let engineInterval, isLocked = false;
-        
         function runPatternEngine() {
             const sig = document.getElementById('sigText'), timer = document.getElementById('timer'), acc = document.getElementById('accuracy');
             const msg = document.getElementById('statusMsg'), bar = document.getElementById('bar'), card = document.getElementById('card');
             const pName = document.getElementById('patternName');
-
             const patterns = ["Hammer Detected", "Shooting Star", "Bullish Engulfing", "Bearish Harami", "Morning Star", "Doji Reversal"];
 
             if(engineInterval) clearInterval(engineInterval);
-            
             engineInterval = setInterval(() => {
                 const now = new Date(), secondsLeft = 60 - now.getSeconds();
                 timer.innerText = `00:${secondsLeft < 10 ? '0' + secondsLeft : secondsLeft}`;
                 bar.style.width = (secondsLeft / 60) * 100 + "%";
-
                 if(secondsLeft <= 10 && secondsLeft > 0) {
                     if(!isLocked) {
                         const winRate = Math.floor(Math.random() * (99 - 95) + 95); 
-                        const randPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                        const decision = Math.random();
-                        
                         acc.innerText = winRate + "%";
-                        pName.innerText = "PATTERN: " + randPattern;
-                        
-                        if(decision > 0.5) {
-                            sig.innerText = "CALL ⬆"; 
-                            sig.className = "text-3xl font-black text-green-500 win-glow animate-bounce";
+                        pName.innerText = "PATTERN: " + patterns[Math.floor(Math.random() * patterns.length)];
+                        if(Math.random() > 0.5) {
+                            sig.innerText = "CALL ⬆"; sig.className = "text-3xl font-black text-green-500 win-glow animate-bounce";
                             card.style.borderColor = "#22c55e";
                         } else {
-                            sig.innerText = "PUT ⬇"; 
-                            sig.className = "text-3xl font-black text-red-500 win-glow animate-bounce";
+                            sig.innerText = "PUT ⬇"; sig.className = "text-3xl font-black text-red-500 win-glow animate-bounce";
                             card.style.borderColor = "#ef4444";
                         }
-                        msg.innerText = "NEXT CANDLE PREDICTED";
                         isLocked = true;
                     }
-                } 
-                else if(secondsLeft > 10) {
+                } else if(secondsLeft > 10) {
                     if(isLocked) {
-                        sig.innerText = "SCANNING..."; 
-                        sig.className = "text-3xl font-black text-gray-600";
-                        pName.innerText = "Finding Patterns...";
+                        sig.innerText = "SCANNING..."; sig.className = "text-3xl font-black text-gray-600";
                         card.style.borderColor = "rgba(234, 179, 8, 0.1)";
-                        msg.innerText = "Analyzing Technical Trends..."; 
-                        acc.innerText = "--%";
                         isLocked = false;
                     }
                 }
