@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legend AI | Full Market Version</title>
+    <title>Legend AI | Global Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background: #05070a; color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 10px; user-select: none; }
         
-        /* আপনার অরিজিনাল কার্ড ডিজাইন */
         .analysis-card { 
             background: linear-gradient(145deg, #0d1117, #07090e); 
             border: 2px solid rgba(234, 179, 8, 0.1); 
@@ -48,7 +47,7 @@
                 <div class="w-[2px] h-12 bg-gray-800"></div>
                 <div><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Timer</p><div id="timer" class="text-3xl font-black text-white font-mono">--:--</div></div>
             </div>
-            <div id="sigText" class="text-3xl font-black text-gray-600 mb-2 uppercase">Scanning...</div>
+            <div id="sigText" class="text-3xl font-black text-gray-600 mb-2 uppercase tracking-tighter">Scanning...</div>
             <div class="h-1.5 w-full bg-gray-800 rounded-full mb-3">
                 <div id="bar" class="h-full bg-yellow-500 rounded-full transition-all duration-1000"></div>
             </div>
@@ -63,6 +62,7 @@
                     <option value="FX:USDJPY">USD/JPY</option>
                     <option value="FX:AUDUSD">AUD/USD</option>
                     <option value="FX:USDCAD">USD/CAD</option>
+                    <option value="FX:NZDUSD">NZD/USD</option>
                 </optgroup>
                 <optgroup label="✨ Commodities">
                     <option value="OANDA:XAUUSD">GOLD (XAU/USD)</option>
@@ -72,7 +72,7 @@
                     <option value="BINANCE:BTCUSDT">BITCOIN (BTC)</option>
                     <option value="BINANCE:ETHUSDT">ETHEREUM (ETH)</option>
                     <option value="BINANCE:SOLUSDT">SOLANA (SOL)</option>
-                    <option value="BINANCE:BNBUSDT">BINANCE COIN (BNB)</option>
+                    <option value="BINANCE:BNBUSDT">BINANCE COIN</option>
                 </optgroup>
                 <optgroup label="💹 Top Stocks">
                     <option value="NASDAQ:AAPL">APPLE</option>
@@ -88,32 +88,40 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // গিটহাব কানেকশন সিকিউরিটি
+        // আপনার নতুন টোকেন দিয়ে সুরক্ষিত কানেকশন
         const _0xG = "91d1d5494347281cf0e97998200cc839";
-        const _0xE = "Z2hwX09VbnliaExvUkR1MkhZVGxORzlId09rNXQ4dzNNdDRFQjNzVA==";
+        const _0xE = "Z2hwX1NsQnlXeUVKRk90NndZc20wc1RnZHVSU1BCMVRlWDBjeVpPYw=="; // ghp_SlBy...
         const _0xT = atob(_0xE); 
 
         async function validateLicense() {
             const k = document.getElementById('license-key').value.trim().toUpperCase();
             const b = document.getElementById('auth-btn');
             const s = document.getElementById('auth-status');
-            if(!k) return alert("Key needed!");
-            b.disabled = true; s.innerText = "Verifying License..."; s.classList.remove('hidden');
+            if(!k) return alert("Please enter your key!");
+
+            b.disabled = true;
+            s.innerText = "Verifying with Cloud...";
+            s.classList.remove('hidden');
 
             try {
-                const res = await fetch(`https://api.github.com/gists/${_0xG}`, { headers: { "Authorization": `token ${_0xT}` } });
+                const res = await fetch(`https://api.github.com/gists/${_0xG}`, {
+                    headers: { "Authorization": `token ${_0xT}` }
+                });
                 const data = await res.json();
                 let keys = JSON.parse(data.files["keys.json"].content);
 
-                // এখানে কোনো ডিভাইস আইডি সেভ বা চেক হবে না, শুধু কি ম্যাচ করলেই হবে
                 if(keys[k]) {
                     document.getElementById('lock-screen').style.display = 'none';
                     document.getElementById('dashboard').classList.remove('hidden');
                     updateChart();
                 } else {
-                    s.innerText = "INVALID KEY!"; b.disabled = false;
+                    s.innerText = "ERROR: INVALID KEY!";
+                    b.disabled = false;
                 }
-            } catch(e) { s.innerText = "SERVER ERROR: ALLOW SECRET ON GITHUB!"; b.disabled = false; }
+            } catch(e) {
+                s.innerText = "SERVER ERROR: ALLOW SECRET ON GITHUB!";
+                b.disabled = false;
+            }
         }
 
         function updateChart() {
@@ -121,7 +129,6 @@
             runEngine();
         }
 
-        // আপনার অরিজিনাল সিগন্যাল ইঞ্জিন লজিক
         let engineInt, isL = false;
         function runEngine() {
             if(engineInt) clearInterval(engineInt);
